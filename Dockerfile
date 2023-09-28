@@ -3,10 +3,10 @@ WORKDIR /src
 ENV CGO_ENABLED=0
 COPY go.* /src/
 RUN go mod download
-COPY *.go .
+COPY . .
 RUN go build -a -o app -ldflags="-s -w" -trimpath
 
-FROM scratch:latest
+FROM alpine:latest
 
 RUN mkdir -p /app \
     && adduser -D user \

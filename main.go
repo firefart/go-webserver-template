@@ -2,117 +2,105 @@ package main
 
 import (
 	"context"
+	"embed"
 	"flag"
+	"fmt"
+	"html/template"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
-	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/patrickmn/go-cache"
 	"github.com/sirupsen/logrus"
 )
 
-type Logger interface {
-	Debug(args ...interface{})
-	Debugf(format string, args ...interface{})
-	Infof(format string, args ...interface{})
-	Info(args ...interface{})
-	Error(args ...interface{})
-	Errorf(format string, args ...interface{})
-	Warn(args ...interface{})
-	Warnf(format string, args ...interface{})
-	SetOutput(io.Writer)
-	SetLevel(logrus.Level)
-}
+//go:embed templates
+//go:embed assets
+var staticFS embed.FS
 
 type application struct {
-	logger  Logger
-	timeout time.Duration
+	logger   *logrus.Logger
+	debug    bool
+	config   Configuration
+	renderer *TemplateRenderer
+	cache    *cache.Cache
 }
 
-func lookupEnvOrString(log Logger, key string, defaultVal string) string {
-	if val, ok := os.LookupEnv(key); ok {
-		return val
-	}
-	return defaultVal
+// TemplateRenderer is a custom html/template renderer for Echo framework
+type TemplateRenderer struct {
+	templates *template.Template
 }
 
-func lookupEnvOrBool(log Logger, key string, defaultVal bool) bool {
-	if val, ok := os.LookupEnv(key); ok {
-		v, err := strconv.ParseBool(val)
-		if err != nil {
-			log.Errorf("lookupEnvOrBool[%s]: %v", key, err)
-			return defaultVal
-		}
-		return v
-	}
-	return defaultVal
+type cacheEntry struct {
+	found bool
+	url   string
 }
 
-func lookupEnvOrDuration(log Logger, key string, defaultVal time.Duration) time.Duration {
-	if val, ok := os.LookupEnv(key); ok {
-		v, err := time.ParseDuration(val)
-		if err != nil {
-			log.Errorf("lookupEnvOrDuration[%s]: %v", key, err)
-			return defaultVal
-		}
-		return v
-	}
-	return defaultVal
+// Render renders a template document
+func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+	return t.templates.ExecuteTemplate(w, name, data)
 }
 
 func main() {
+	logger := logrus.New()
+	logger.SetOutput(os.Stdout)
+	logger.SetLevel(logrus.InfoLevel)
+	if err := run(logger); err != nil {
+		logger.Errorf("[ERROR] %s", err)
+	}
+}
+
+func run(logger *logrus.Logger) error {
 	app := &application{
-		logger: logrus.New(),
+		logger: logger,
 	}
 
-	var host string
-	var wait time.Duration
+	var configFile string
 	var debugOutput bool
-	flag.StringVar(&host,
-		"host",
-		lookupEnvOrString(app.logger, "APP_HOST", ":8080"),
-		"IP and Port to bind to. Can also be set through the APP_HOST environment variable.")
-	flag.BoolVar(&debugOutput,
-		"debug",
-		lookupEnvOrBool(app.logger, "APP_DEBUG", false),
-		"Enable DEBUG mode. Can also be set through the APP_DEBUG environment variable.")
-	flag.DurationVar(&wait,
-		"graceful-timeout",
-		lookupEnvOrDuration(app.logger, "APP_GRACEFUL_TIMEOUT", 5*time.Second),
-		"the duration for which the server gracefully wait for existing connections to finish - e.g. 15s or 1m. Can also be set through the APP_GRACEFUL_TIMEOUT environment variable.")
-	flag.DurationVar(&app.timeout,
-		"timeout",
-		lookupEnvOrDuration(app.logger, "APP_TIMEOUT", 10*time.Second),
-		"the timeout for http calls. Can also be set through the APP_TIMEOUT environment variable.")
+	flag.StringVar(&configFile, "c", "", "config file to use")
+	flag.BoolVar(&debugOutput, "debug", false, "enable debug logging")
 	flag.Parse()
 
-	gin.SetMode(gin.ReleaseMode)
+	if configFile == "" {
+		return fmt.Errorf("please provide a config file")
+	}
 
-	app.logger.SetOutput(os.Stdout)
-	app.logger.SetLevel(logrus.InfoLevel)
+	config, err := GetConfig(configFile)
+	if err != nil {
+		return err
+	}
+	app.config = config
+
 	if debugOutput {
-		gin.SetMode(gin.DebugMode)
 		app.logger.SetLevel(logrus.DebugLevel)
-		app.logger.Debug("DEBUG mode enabled")
+		app.debug = true
 	}
 
 	app.logger.Info("Starting server with the following parameters:")
-	app.logger.Infof("host: %s", host)
-	app.logger.Infof("debug: %t", debugOutput)
-	app.logger.Infof("graceful timeout: %s", wait)
-	app.logger.Infof("timeout: %s", app.timeout)
+	app.logger.Infof("port: %d", config.Server.Port)
+	app.logger.Infof("graceful timeout: %s", config.Server.GracefulTimeout)
+	app.logger.Infof("timeout: %s", config.Timeout)
+	app.logger.Infof("debug: %t", app.debug)
+
+	app.renderer = &TemplateRenderer{
+		templates: template.Must(template.New("").Funcs(template.FuncMap{"StringsJoin": strings.Join}).ParseFS(staticFS, "templates/*")),
+	}
+	app.cache = cache.New(config.Cache.Timeout, config.Cache.Timeout)
 
 	srv := &http.Server{
-		Addr:    host,
+		Addr:    net.JoinHostPort("", strconv.Itoa(config.Server.Port)),
 		Handler: app.routes(),
 	}
 
 	go func() {
-		if err := srv.ListenAndServe(); err != nil {
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 			app.logger.Error(err)
 		}
 	}()
@@ -120,30 +108,34 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT)
 	<-c
-	ctx, cancel := context.WithTimeout(context.Background(), wait)
+	ctx, cancel := context.WithTimeout(context.Background(), config.Server.GracefulTimeout)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
 		app.logger.Error(err)
 	}
 	app.logger.Info("shutting down")
 	os.Exit(0)
-}
-
-func errorJson(errorText string) gin.H {
-	return gin.H{
-		"error": errorText,
-	}
+	return nil
 }
 
 func (app *application) routes() http.Handler {
-	r := gin.Default()
-	r.NoRoute(func(c *gin.Context) {
-		c.JSON(http.StatusNotFound, errorJson("Page not found"))
+	e := echo.New()
+	e.HideBanner = true
+	e.Debug = app.debug
+	e.Renderer = app.renderer
+
+	if app.config.Cloudflare {
+		e.IPExtractor = echo.ExtractIPFromRealIPHeader()
+	}
+
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.StaticFS("/static", echo.MustSubFS(staticFS, "assets"))
+	e.GET("/", func(c echo.Context) error {
+		return c.Render(http.StatusOK, "index.html", nil)
 	})
-	r.GET("/path/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"content": "OK",
-		})
+	e.GET("/test", func(c echo.Context) error {
+		return c.String(http.StatusOK, "route")
 	})
-	return r
+	return e
 }

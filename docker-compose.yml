@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: -c config.json
+    volumes:
+      - ${PWD}/config.json:/app/config.json
+    networks:
+      - app
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    env_file:
+      - cloudflare.env
+    networks:
+      - app
+
+networks:
+  app: {}
