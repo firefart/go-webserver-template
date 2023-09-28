@@ -38,11 +38,6 @@ type TemplateRenderer struct {
 	templates *template.Template
 }
 
-type cacheEntry struct {
-	found bool
-	url   string
-}
-
 // Render renders a template document
 func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	return t.templates.ExecuteTemplate(w, name, data)
