@@ -17,6 +17,11 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/nikoksr/notify"
+	"github.com/nikoksr/notify/service/discord"
+	"github.com/nikoksr/notify/service/mail"
+	"github.com/nikoksr/notify/service/sendgrid"
+	"github.com/nikoksr/notify/service/telegram"
 	"github.com/patrickmn/go-cache"
 	"github.com/sirupsen/logrus"
 )
@@ -25,12 +30,16 @@ import (
 //go:embed assets
 var staticFS embed.FS
 
+var secretKeyHeaderName = http.CanonicalHeaderKey("X-Secret-Key-Header")
+var cloudflareIPHeaderName = http.CanonicalHeaderKey("CF-Connecting-IP")
+
 type application struct {
 	logger   *logrus.Logger
 	debug    bool
 	config   Configuration
 	renderer *TemplateRenderer
 	cache    *cache.Cache
+	notify   *notify.Notify
 }
 
 // TemplateRenderer is a custom html/template renderer for Echo framework
@@ -78,6 +87,66 @@ func run(logger *logrus.Logger) error {
 		app.debug = true
 	}
 
+	app.notify = notify.New()
+	var services []notify.Notifier
+
+	if config.Notifications.Telegram.APIToken != "" {
+		app.logger.Info("Notifications: using telegram")
+		telegramService, err := telegram.New(config.Notifications.Telegram.APIToken)
+		if err != nil {
+			return fmt.Errorf("telegram setup: %w", err)
+		}
+		telegramService.AddReceivers(config.Notifications.Telegram.ChatIDs...)
+		services = append(services, telegramService)
+	}
+
+	if config.Notifications.Discord.BotToken != "" || config.Notifications.Discord.OAuthToken != "" {
+		app.logger.Info("Notifications: using discord")
+		discordService := discord.New()
+		if config.Notifications.Discord.BotToken != "" {
+			if err := discordService.AuthenticateWithBotToken(config.Notifications.Discord.BotToken); err != nil {
+				return fmt.Errorf("discord bot token setup: %w", err)
+			}
+		} else if config.Notifications.Discord.OAuthToken != "" {
+			if err := discordService.AuthenticateWithOAuth2Token(config.Notifications.Discord.OAuthToken); err != nil {
+				return fmt.Errorf("discord oauth token setup: %w", err)
+			}
+		} else {
+			panic("logic error")
+		}
+		discordService.AddReceivers(config.Notifications.Discord.ChannelIDs...)
+		services = append(services, discordService)
+	}
+
+	if app.config.Notifications.Email.Server != "" {
+		app.logger.Info("Notifications: using email")
+		mailHost := net.JoinHostPort(app.config.Notifications.Email.Server, strconv.Itoa(app.config.Notifications.Email.Port))
+		mailService := mail.New(app.config.Notifications.Email.Sender, mailHost)
+		if app.config.Notifications.Email.Username != "" && app.config.Notifications.Email.Password != "" {
+			mailService.AuthenticateSMTP(
+				"",
+				app.config.Notifications.Email.Username,
+				app.config.Notifications.Email.Password,
+				app.config.Notifications.Email.Server,
+			)
+		}
+		mailService.AddReceivers(app.config.Notifications.Email.Recipients...)
+		services = append(services, mailService)
+	}
+
+	if config.Notifications.SendGrid.APIKey != "" {
+		app.logger.Info("Notifications: using sendgrid")
+		sendGridService := sendgrid.New(
+			config.Notifications.SendGrid.APIKey,
+			config.Notifications.SendGrid.SenderAddress,
+			config.Notifications.SendGrid.SenderName,
+		)
+		sendGridService.AddReceivers(config.Notifications.SendGrid.Recipients...)
+		services = append(services, sendGridService)
+	}
+
+	app.notify.UseServices(services...)
+
 	app.logger.Info("Starting server with the following parameters:")
 	app.logger.Infof("port: %d", config.Server.Port)
 	app.logger.Infof("graceful timeout: %s", config.Server.GracefulTimeout)
@@ -120,17 +189,43 @@ func (app *application) routes() http.Handler {
 	e.Renderer = app.renderer
 
 	if app.config.Cloudflare {
-		e.IPExtractor = echo.ExtractIPFromRealIPHeader()
+		e.IPExtractor = extractIPFromCloudflareHeader()
 	}
 
 	e.Use(middleware.Logger())
+	e.Use(middleware.Secure())
 	e.Use(middleware.Recover())
 	e.StaticFS("/static", echo.MustSubFS(staticFS, "assets"))
 	e.GET("/", func(c echo.Context) error {
+		return c.Render(http.StatusOK, "index.html", nil)
+	})
+	e.GET("/test_notifications", func(c echo.Context) error {
+		if c.Request().Header.Get(secretKeyHeaderName) == app.config.Notifications.SecretKeyHeader {
+			app.logEror(fmt.Errorf("test"))
+		} else {
+			app.logger.Errorf("test_notification called without valid header")
+		}
 		return c.Render(http.StatusOK, "index.html", nil)
 	})
 	e.GET("/test", func(c echo.Context) error {
 		return c.String(http.StatusOK, "route")
 	})
 	return e
+}
+
+func (app *application) logEror(err error) {
+	app.logger.Errorf("[ERROR] %s", err)
+	if err2 := app.notify.Send(context.Background(), "[ERROR]", err.Error()); err != nil {
+		app.logger.Errorf("[ERROR] %s", err2)
+	}
+}
+
+func extractIPFromCloudflareHeader() echo.IPExtractor {
+	return func(req *http.Request) string {
+		if realIP := req.Header.Get(cloudflareIPHeaderName); realIP != "" {
+			return realIP
+		}
+		// fall back to normal ip extraction
+		return echo.ExtractIPDirect()(req)
+	}
 }
