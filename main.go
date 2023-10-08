@@ -195,7 +195,11 @@ func (app *application) routes() http.Handler {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Secure())
 	e.Use(middleware.Recover())
-	e.StaticFS("/static", echo.MustSubFS(staticFS, "assets"))
+
+	static := echo.MustSubFS(staticFS, "assets")
+	e.FileFS("/robots.txt", "robots.txt", static)
+	e.StaticFS("/static", static)
+
 	e.GET("/", func(c echo.Context) error {
 		return c.Render(http.StatusOK, "index.html", nil)
 	})
