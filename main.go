@@ -204,7 +204,10 @@ func (app *application) routes() http.Handler {
 		return c.Render(http.StatusOK, "index.html", nil)
 	})
 	e.GET("/test_notifications", func(c echo.Context) error {
-		if c.Request().Header.Get(secretKeyHeaderName) == app.config.Notifications.SecretKeyHeader {
+		headerValue := c.Request().Header.Get(secretKeyHeaderName)
+		if headerValue == "" {
+			app.logger.Errorf("test_notification called without secret header")
+		} else if headerValue == app.config.Notifications.SecretKeyHeader {
 			app.logEror(fmt.Errorf("test"))
 		} else {
 			app.logger.Errorf("test_notification called without valid header")
