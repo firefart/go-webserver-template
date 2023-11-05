@@ -20,7 +20,7 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible // indirect
 	github.com/knadh/koanf/maps v0.1.1 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
@@ -41,9 +41,9 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sync v0.4.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
-	golang.org/x/time v0.3.0 // indirect
+	golang.org/x/sync v0.5.0 // indirect
+	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/time v0.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
