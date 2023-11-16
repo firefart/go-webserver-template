@@ -24,6 +24,8 @@ import (
 	"github.com/nikoksr/notify/service/telegram"
 	"github.com/patrickmn/go-cache"
 	"github.com/sirupsen/logrus"
+
+	_ "go.uber.org/automaxprocs"
 )
 
 //go:embed templates

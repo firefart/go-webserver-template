@@ -11,6 +11,7 @@ require (
 	github.com/nikoksr/notify v0.41.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/sirupsen/logrus v1.9.3
+	go.uber.org/automaxprocs v1.5.3
 )
 
 require (
