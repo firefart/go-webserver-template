@@ -42,4 +42,4 @@ test:
 
 .PHONY: run
 run: build
-	 ./${PROG} -host 0.0.0.0:8000 -debug
+	 ./${PROG} -host 0.0.0.0:8000 -debug -c config.json
