@@ -1,0 +1,15 @@
+[Unit]
+Description=app
+Wants=network-online.target
+After=network.target network-online.target
+
+[Service]
+User=app
+Group=nogroup
+SyslogIdentifier=app
+ExecStart=/home/app/app -c /home/app/config.json
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
