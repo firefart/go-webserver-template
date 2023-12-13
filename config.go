@@ -65,7 +65,7 @@ type ConfigNotificationSendGrid struct {
 }
 
 type ConfigNotificationMSTeams struct {
-	Webhooks []string `koanf:"web_hooks"`
+	Webhooks []string `koanf:"webhooks"`
 }
 
 var defaultConfig = Configuration{
