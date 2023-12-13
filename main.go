@@ -20,6 +20,7 @@ import (
 	"github.com/nikoksr/notify"
 	"github.com/nikoksr/notify/service/discord"
 	"github.com/nikoksr/notify/service/mail"
+	"github.com/nikoksr/notify/service/msteams"
 	"github.com/nikoksr/notify/service/sendgrid"
 	"github.com/nikoksr/notify/service/telegram"
 	"github.com/patrickmn/go-cache"
@@ -145,6 +146,13 @@ func run(logger *logrus.Logger) error {
 		)
 		sendGridService.AddReceivers(config.Notifications.SendGrid.Recipients...)
 		services = append(services, sendGridService)
+	}
+
+	if config.Notifications.MSTeams.Webhooks != nil && len(config.Notifications.MSTeams.Webhooks) > 1 {
+		app.logger.Info("Notifications: using msteams")
+		msteamsService := msteams.New()
+		msteamsService.AddReceivers(config.Notifications.MSTeams.Webhooks...)
+		services = append(services, msteamsService)
 	}
 
 	app.notify.UseServices(services...)

@@ -35,6 +35,7 @@ type ConfigNotification struct {
 	Discord         ConfigNotificationDiscord  `koanf:"discord"`
 	Email           ConfigNotificationEmail    `koanf:"email"`
 	SendGrid        ConfigNotificationSendGrid `koanf:"sendgrid"`
+	MSTeams         ConfigNotificationMSTeams  `koand:"msteams"`
 }
 
 type ConfigNotificationTelegram struct {
@@ -61,6 +62,10 @@ type ConfigNotificationSendGrid struct {
 	SenderAddress string   `koanf:"sender_address"`
 	SenderName    string   `koanf:"sender_name"`
 	Recipients    []string `koanf:"recipients"`
+}
+
+type ConfigNotificationMSTeams struct {
+	Webhooks []string `koanf:"web_hooks"`
 }
 
 var defaultConfig = Configuration{
