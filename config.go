@@ -19,6 +19,7 @@ type Configuration struct {
 }
 
 type ConfigServer struct {
+	Listen          string        `koanf:"listen"`
 	Port            int           `koanf:"port"`
 	GracefulTimeout time.Duration `koanf:"graceful_timeout"`
 }

@@ -150,7 +150,7 @@ func run(logger *logrus.Logger) error {
 	app.notify.UseServices(services...)
 
 	app.logger.Info("Starting server with the following parameters:")
-	app.logger.Infof("port: %d", config.Server.Port)
+	app.logger.Infof("listen: %s:%d", config.Server.Listen, config.Server.Port)
 	app.logger.Infof("graceful timeout: %s", config.Server.GracefulTimeout)
 	app.logger.Infof("timeout: %s", config.Timeout)
 	app.logger.Infof("debug: %t", app.debug)
@@ -161,7 +161,7 @@ func run(logger *logrus.Logger) error {
 	app.cache = cache.New(config.Cache.Timeout, config.Cache.Timeout)
 
 	srv := &http.Server{
-		Addr:    net.JoinHostPort("", strconv.Itoa(config.Server.Port)),
+		Addr:    net.JoinHostPort(config.Server.Listen, strconv.Itoa(config.Server.Port)),
 		Handler: app.routes(),
 	}
 
