@@ -7,16 +7,20 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"syscall"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/lmittmann/tint"
+	"github.com/mattn/go-isatty"
 	"github.com/nikoksr/notify"
 	"github.com/nikoksr/notify/service/discord"
 	"github.com/nikoksr/notify/service/mail"
@@ -24,7 +28,6 @@ import (
 	"github.com/nikoksr/notify/service/sendgrid"
 	"github.com/nikoksr/notify/service/telegram"
 	"github.com/patrickmn/go-cache"
-	"github.com/sirupsen/logrus"
 
 	_ "go.uber.org/automaxprocs"
 )
@@ -37,7 +40,7 @@ var secretKeyHeaderName = http.CanonicalHeaderKey("X-Secret-Key-Header")
 var cloudflareIPHeaderName = http.CanonicalHeaderKey("CF-Connecting-IP")
 
 type application struct {
-	logger   *logrus.Logger
+	logger   *slog.Logger
 	debug    bool
 	config   Configuration
 	renderer *TemplateRenderer
@@ -56,15 +59,21 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 }
 
 func main() {
-	logger := logrus.New()
-	logger.SetOutput(os.Stdout)
-	logger.SetLevel(logrus.InfoLevel)
-	if err := run(logger); err != nil {
-		logger.Errorf("[ERROR] %s", err)
+	w := os.Stdout
+	var level = new(slog.LevelVar)
+	level.Set(slog.LevelInfo)
+	logger := slog.New(tint.NewHandler(w, &tint.Options{
+		Level:   level,
+		NoColor: !isatty.IsTerminal(w.Fd()),
+	}))
+	if err := run(logger, level); err != nil {
+		trace := string(debug.Stack())
+		logger.Error(err.Error(), "trace", trace)
+		os.Exit(1)
 	}
 }
 
-func run(logger *logrus.Logger) error {
+func run(logger *slog.Logger, level *slog.LevelVar) error {
 	app := &application{
 		logger: logger,
 	}
@@ -86,7 +95,7 @@ func run(logger *logrus.Logger) error {
 	app.config = config
 
 	if debugOutput {
-		app.logger.SetLevel(logrus.DebugLevel)
+		level.Set(slog.LevelDebug)
 		app.debug = true
 	}
 
@@ -157,11 +166,13 @@ func run(logger *logrus.Logger) error {
 
 	app.notify.UseServices(services...)
 
-	app.logger.Info("Starting server with the following parameters:")
-	app.logger.Infof("listen: %s:%d", config.Server.Listen, config.Server.Port)
-	app.logger.Infof("graceful timeout: %s", config.Server.GracefulTimeout)
-	app.logger.Infof("timeout: %s", config.Timeout)
-	app.logger.Infof("debug: %t", app.debug)
+	app.logger.Info("Starting server",
+		slog.String("host", config.Server.Listen),
+		slog.Int("port", config.Server.Port),
+		slog.Duration("gracefultimeout", config.Server.GracefulTimeout),
+		slog.Duration("timeout", config.Timeout),
+		slog.Bool("debug", app.debug),
+	)
 
 	app.renderer = &TemplateRenderer{
 		templates: template.Must(template.New("").Funcs(template.FuncMap{"StringsJoin": strings.Join}).ParseFS(staticFS, "templates/*")),
@@ -175,7 +186,7 @@ func run(logger *logrus.Logger) error {
 
 	go func() {
 		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
-			app.logger.Error(err)
+			app.logger.Error(err.Error(), "trace", string(debug.Stack()))
 		}
 	}()
 
@@ -185,7 +196,7 @@ func run(logger *logrus.Logger) error {
 	ctx, cancel := context.WithTimeout(context.Background(), config.Server.GracefulTimeout)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		app.logger.Error(err)
+		app.logger.Error(err.Error(), "trace", string(debug.Stack()))
 	}
 	app.logger.Info("shutting down")
 	os.Exit(0)
@@ -216,11 +227,11 @@ func (app *application) routes() http.Handler {
 	e.GET("/test_notifications", func(c echo.Context) error {
 		headerValue := c.Request().Header.Get(secretKeyHeaderName)
 		if headerValue == "" {
-			app.logger.Errorf("test_notification called without secret header")
+			app.logger.Error("test_notification called without secret header")
 		} else if headerValue == app.config.Notifications.SecretKeyHeader {
 			app.logEror(fmt.Errorf("test"))
 		} else {
-			app.logger.Errorf("test_notification called without valid header")
+			app.logger.Error("test_notification called without valid header")
 		}
 		return c.Render(http.StatusOK, "index.html", nil)
 	})
@@ -231,9 +242,9 @@ func (app *application) routes() http.Handler {
 }
 
 func (app *application) logEror(err error) {
-	app.logger.Errorf("[ERROR] %s", err)
+	app.logger.Error(err.Error(), "trace", string(debug.Stack()))
 	if err2 := app.notify.Send(context.Background(), "[ERROR]", err.Error()); err != nil {
-		app.logger.Errorf("[ERROR] %s", err2)
+		app.logger.Error(err2.Error(), "trace", string(debug.Stack()))
 	}
 }
 
