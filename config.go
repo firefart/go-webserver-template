@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/knadh/koanf/parsers/json"
@@ -20,7 +19,7 @@ type Configuration struct {
 
 type ConfigServer struct {
 	Listen          string        `koanf:"listen"`
-	Port            int           `koanf:"port"`
+	PprofListen     string        `koanf:"listen_pprof"`
 	GracefulTimeout time.Duration `koanf:"graceful_timeout"`
 }
 
@@ -70,7 +69,8 @@ type ConfigNotificationMSTeams struct {
 
 var defaultConfig = Configuration{
 	Server: ConfigServer{
-		Port:            8000,
+		Listen:          "127.0.0.1:8000",
+		PprofListen:     "127.0.0.1:1234",
 		GracefulTimeout: 10 * time.Second,
 	},
 	Cache: ConfigCache{
@@ -97,11 +97,6 @@ func GetConfig(f string) (Configuration, error) {
 	var config Configuration
 	if err := k.Unmarshal("", &config); err != nil {
 		return Configuration{}, err
-	}
-
-	// check some stuff
-	if config.Server.Port == 0 {
-		return Configuration{}, fmt.Errorf("please supply a port to listen on")
 	}
 
 	return config, nil

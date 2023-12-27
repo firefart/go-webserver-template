@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"embed"
+	"errors"
 	"flag"
 	"fmt"
 	"html/template"
@@ -28,6 +29,8 @@ import (
 	"github.com/nikoksr/notify/service/sendgrid"
 	"github.com/nikoksr/notify/service/telegram"
 	"github.com/patrickmn/go-cache"
+
+	_ "net/http/pprof"
 
 	_ "go.uber.org/automaxprocs"
 )
@@ -185,7 +188,6 @@ func run(logger *slog.Logger, configFilename string) error {
 
 	app.logger.Info("Starting server",
 		slog.String("host", config.Server.Listen),
-		slog.Int("port", config.Server.Port),
 		slog.Duration("gracefultimeout", config.Server.GracefulTimeout),
 		slog.Duration("timeout", config.Timeout),
 		slog.Bool("debug", app.debug),
@@ -197,7 +199,7 @@ func run(logger *slog.Logger, configFilename string) error {
 	app.cache = cache.New(config.Cache.Timeout, config.Cache.Timeout)
 
 	srv := &http.Server{
-		Addr:    net.JoinHostPort(config.Server.Listen, strconv.Itoa(config.Server.Port)),
+		Addr:    config.Server.Listen,
 		Handler: app.routes(),
 	}
 
@@ -207,15 +209,36 @@ func run(logger *slog.Logger, configFilename string) error {
 		}
 	}()
 
+	app.logger.Info("Starting pprof server",
+		slog.String("host", app.config.Server.PprofListen),
+	)
+
+	pprofSrv := &http.Server{
+		Addr: app.config.Server.PprofListen,
+	}
+	go func() {
+		metricsMux := http.NewServeMux()
+		metricsMux.Handle("/debug/pprof/", http.DefaultServeMux)
+		if err := pprofSrv.ListenAndServe(); err != nil {
+			// not interested in server closed messages
+			if !errors.Is(err, http.ErrServerClosed) {
+				app.logger.Error(err.Error(), "trace", string(debug.Stack()))
+			}
+		}
+	}()
+
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT)
 	<-c
+	app.logger.Info("shutting down")
 	ctx, cancel := context.WithTimeout(context.Background(), config.Server.GracefulTimeout)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
 		app.logger.Error(err.Error(), "trace", string(debug.Stack()))
 	}
-	app.logger.Info("shutting down")
+	if err := pprofSrv.Shutdown(ctx); err != nil {
+		app.logger.Error(err.Error(), "trace", string(debug.Stack()))
+	}
 	os.Exit(0)
 	return nil
 }
