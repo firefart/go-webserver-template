@@ -59,45 +59,62 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 }
 
 func main() {
+	var debugMode bool
+	var configFilename string
+	flag.BoolVar(&debugMode, "debug", false, "Enable DEBUG mode")
+	flag.StringVar(&configFilename, "config", "", "config file to use")
+	flag.Parse()
+
 	w := os.Stdout
 	var level = new(slog.LevelVar)
 	level.Set(slog.LevelInfo)
-	logger := slog.New(tint.NewHandler(w, &tint.Options{
+	options := &tint.Options{
 		Level:   level,
 		NoColor: !isatty.IsTerminal(w.Fd()),
-	}))
-	if err := run(logger, level); err != nil {
-		trace := string(debug.Stack())
-		logger.Error(err.Error(), "trace", trace)
+	}
+
+	if debugMode {
+		level.Set(slog.LevelDebug)
+		// add source file information
+		wd, err := os.Getwd()
+		if err != nil {
+			panic("unable to determine working directory")
+		}
+		replacer := func(groups []string, a slog.Attr) slog.Attr {
+			if a.Key == slog.SourceKey {
+				source := a.Value.Any().(*slog.Source)
+				// remove current working directory and only leave the relative path to the program
+				if file, ok := strings.CutPrefix(source.File, wd); ok {
+					source.File = file
+				}
+			}
+			return a
+		}
+		options.ReplaceAttr = replacer
+		options.AddSource = true
+	}
+
+	logger := slog.New(tint.NewHandler(w, options))
+	if err := run(logger, configFilename); err != nil {
+		logger.Error(err.Error())
 		os.Exit(1)
 	}
 }
 
-func run(logger *slog.Logger, level *slog.LevelVar) error {
+func run(logger *slog.Logger, configFilename string) error {
 	app := &application{
 		logger: logger,
 	}
 
-	var configFile string
-	var debugOutput bool
-	flag.StringVar(&configFile, "c", "", "config file to use")
-	flag.BoolVar(&debugOutput, "debug", false, "enable debug logging")
-	flag.Parse()
-
-	if configFile == "" {
+	if configFilename == "" {
 		return fmt.Errorf("please provide a config file")
 	}
 
-	config, err := GetConfig(configFile)
+	config, err := GetConfig(configFilename)
 	if err != nil {
 		return err
 	}
 	app.config = config
-
-	if debugOutput {
-		level.Set(slog.LevelDebug)
-		app.debug = true
-	}
 
 	app.notify = notify.New()
 	var services []notify.Notifier
