@@ -204,7 +204,7 @@ func run(logger *slog.Logger, configFilename string) error {
 	}
 
 	go func() {
-		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			app.logger.Error(err.Error(), "trace", string(debug.Stack()))
 		}
 	}()
@@ -219,11 +219,8 @@ func run(logger *slog.Logger, configFilename string) error {
 	go func() {
 		metricsMux := http.NewServeMux()
 		metricsMux.Handle("/debug/pprof/", http.DefaultServeMux)
-		if err := pprofSrv.ListenAndServe(); err != nil {
-			// not interested in server closed messages
-			if !errors.Is(err, http.ErrServerClosed) {
-				app.logger.Error(err.Error(), "trace", string(debug.Stack()))
-			}
+		if err := pprofSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			app.logger.Error(err.Error(), "trace", string(debug.Stack()))
 		}
 	}()
 
