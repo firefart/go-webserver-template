@@ -304,7 +304,7 @@ func (app *application) routes() http.Handler {
 		if headerValue == "" {
 			app.logger.Error("test_notification called without secret header")
 		} else if headerValue == app.config.Notifications.SecretKeyHeader {
-			app.logEror(fmt.Errorf("test"))
+			app.logError(fmt.Errorf("test"))
 		} else {
 			app.logger.Error("test_notification called without valid header")
 		}
@@ -316,7 +316,7 @@ func (app *application) routes() http.Handler {
 	return e
 }
 
-func (app *application) logEror(err error) {
+func (app *application) logError(err error) {
 	app.logger.Error(err.Error(), "trace", string(debug.Stack()))
 	if err2 := app.notify.Send(context.Background(), "[ERROR]", err.Error()); err2 != nil {
 		app.logger.Error(err2.Error(), "trace", string(debug.Stack()))
