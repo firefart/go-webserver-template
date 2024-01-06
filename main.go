@@ -39,6 +39,9 @@ import (
 //go:embed assets
 var staticFS embed.FS
 
+//go:embed error_pages
+var errorPages embed.FS
+
 var secretKeyHeaderName = http.CanonicalHeaderKey("X-Secret-Key-Header")
 var cloudflareIPHeaderName = http.CanonicalHeaderKey("CF-Connecting-IP")
 
@@ -240,11 +243,36 @@ func run(logger *slog.Logger, configFilename string) error {
 	return nil
 }
 
+func customHTTPErrorHandler(err error, c echo.Context) {
+	if c.Response().Committed {
+		return
+	}
+
+	code := http.StatusInternalServerError
+	var echoError *echo.HTTPError
+	if errors.As(err, &echoError) {
+		code = echoError.Code
+	}
+	c.Logger().Error(err)
+
+	errorPage := fmt.Sprintf("error_pages/HTTP%d.html", code)
+	content, err := errorPages.ReadFile(errorPage)
+	if err != nil {
+		c.Logger().Error(err)
+		return
+	}
+	if err := c.HTMLBlob(code, content); err != nil {
+		c.Logger().Error(err)
+		return
+	}
+}
+
 func (app *application) routes() http.Handler {
 	e := echo.New()
 	e.HideBanner = true
 	e.Debug = app.debug
 	e.Renderer = app.renderer
+	e.HTTPErrorHandler = customHTTPErrorHandler
 
 	if app.config.Cloudflare {
 		e.IPExtractor = extractIPFromCloudflareHeader()
