@@ -318,13 +318,37 @@ func (app *application) routes() http.Handler {
 		},
 	}))
 	e.Use(middleware.Secure())
-	e.Use(middleware.Recover())
+
+	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
+		LogErrorFunc: func(c echo.Context, err error, stack []byte) error {
+			msg := fmt.Sprintf("%v %s", err, string(stack))
+			subject := "PANIC detected"
+			c.Logger().Error(fmt.Sprintf("%s: %s", subject, msg))
+			if err2 := app.notify.Send(context.Background(), subject, msg); err2 != nil {
+				// only log the error as we return a generic error message later
+				c.Logger().Error(err2.Error())
+			}
+			c.Error(fmt.Errorf("error occured - please see log"))
+			return nil
+		},
+	}))
 
 	static := echo.MustSubFS(staticFS, "assets")
 	e.FileFS("/robots.txt", "robots.txt", static)
 	e.StaticFS("/static", static)
 
 	e.GET("/", func(c echo.Context) error {
+		return c.Render(http.StatusOK, "index.html", nil)
+	})
+	e.GET("/test_panic", func(c echo.Context) error {
+		headerValue := c.Request().Header.Get(secretKeyHeaderName)
+		if headerValue == "" {
+			app.logger.Error("test_notification called without secret header")
+		} else if headerValue == app.config.Notifications.SecretKeyHeader {
+			panic("test")
+		} else {
+			app.logger.Error("test_notification called without valid header")
+		}
 		return c.Render(http.StatusOK, "index.html", nil)
 	})
 	e.GET("/test_notifications", func(c echo.Context) error {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/knadh/koanf/parsers/json"
@@ -97,6 +98,10 @@ func GetConfig(f string) (Configuration, error) {
 	var config Configuration
 	if err := k.Unmarshal("", &config); err != nil {
 		return Configuration{}, err
+	}
+
+	if config.Notifications.SecretKeyHeader == "" {
+		return Configuration{}, fmt.Errorf("please supply a secret key header in the config")
 	}
 
 	return config, nil
