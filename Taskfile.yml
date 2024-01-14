@@ -10,6 +10,7 @@ tasks:
       - go mod tidy -v
 
   build:
+    aliases: [default]
     cmds:
       - go fmt ./...
       - go vet ./...
