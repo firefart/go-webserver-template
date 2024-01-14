@@ -11,10 +11,6 @@ docker-update:
 	docker pull scratch:latest
 	docker build --tag ${PROG}:dev .
 
-.PHONY: docker-run
-docker-run: docker-update
-	docker run --init --rm -p 8000:8000 ${PROG}:dev -host 0.0.0.0:8000 -debug
-
 .PHONY: lint
 lint:
 	"$$(go env GOPATH)/bin/golangci-lint" run ./...
