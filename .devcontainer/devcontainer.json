@@ -4,7 +4,8 @@
 	"name": "Go",
 	"image": "mcr.microsoft.com/devcontainers/go",
 	"features": {
-		"ghcr.io/guiyomh/features/golangci-lint:0": {}
+		"ghcr.io/guiyomh/features/golangci-lint:0": {},
+		"ghcr.io/devcontainers-contrib/features/go-task:1": {}
 	},
 	"postCreateCommand": "go mod download",
 	// Features to add to the dev container. More info: https://containers.dev/features.
