@@ -280,7 +280,7 @@ func (app *application) customHTTPErrorHandler(err error, c echo.Context) {
 
 		go func(e error) {
 			app.logger.Debug("sending error notification", slog.String("err", e.Error()))
-			if err2 := app.notify.Send(context.Background(), "ERROR in undwersansiebitte", e.Error()); err2 != nil {
+			if err2 := app.notify.Send(context.Background(), "ERROR", e.Error()); err2 != nil {
 				app.logger.Error("error on notification send", slog.String("err", err2.Error()))
 			}
 		}(err)
