@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 vars:
   PROGRAM: template
@@ -24,7 +24,11 @@ tasks:
 
   run:
     cmds:
-      - ./{{.PROGRAM}}} -debug -c config.json
+      - go run . -debug -config config.json
+
+  run-json:
+    cmds:
+      - go run . -debug -config config.json -json
 
   lint:
     cmds:
