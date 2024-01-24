@@ -366,11 +366,11 @@ func (app *application) routes() http.Handler {
 
 		headerValue := c.Request().Header.Get(secretKeyHeaderName)
 		if headerValue == "" {
-			app.logger.Error("test_notification called without secret header")
+			app.logger.Error("test_panic called without secret header")
 		} else if headerValue == app.config.Notifications.SecretKeyHeader {
 			panic("test")
 		} else {
-			app.logger.Error("test_notification called without valid header")
+			app.logger.Error("test_panic called without valid header")
 		}
 		return c.Render(http.StatusOK, "index.html", nil)
 	})
