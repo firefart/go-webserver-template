@@ -335,8 +335,8 @@ func (app *application) routes() http.Handler {
 				slog.String("uri", v.URI),
 				slog.Int("status", v.Status),
 				slog.String("user-agent", v.UserAgent),
-				slog.Duration("latency", v.Latency),
-				slog.String("content-length", v.ContentLength), // request content length
+				slog.Duration("request-duration", v.Latency),
+				slog.String("request-length", v.ContentLength), // request content length
 				slog.Int64("response-size", v.ResponseSize),
 				slog.String("err", errString))
 
