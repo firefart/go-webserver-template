@@ -1,6 +1,6 @@
 module github.com/firefart/go-webserver-template
 
-go 1.21
+go 1.22
 
 require (
 	github.com/knadh/koanf/parsers/json v0.1.0
