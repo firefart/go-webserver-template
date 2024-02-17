@@ -20,7 +20,7 @@ type Cache[T any] struct {
 	expiration time.Duration
 }
 
-func New[T any](ctx context.Context, logger *slog.Logger, name string, expiration time.Duration) *Cache[T] {
+func NewCache[T any](ctx context.Context, logger *slog.Logger, name string, expiration time.Duration) *Cache[T] {
 	c := Cache[T]{
 		cache:      make(map[string]cacheEntry[T]),
 		logger:     logger,

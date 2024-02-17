@@ -11,7 +11,6 @@ require (
 	github.com/lmittmann/tint v1.0.4
 	github.com/mattn/go-isatty v0.0.20
 	github.com/nikoksr/notify v0.41.0
-	github.com/patrickmn/go-cache v2.1.0+incompatible
 	go.uber.org/automaxprocs v1.5.3
 )
 
