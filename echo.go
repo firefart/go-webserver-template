@@ -31,7 +31,7 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-func (app *application) newServer() http.Handler {
+func (app *application) newServer(ctx context.Context) http.Handler {
 	e := echo.New()
 	e.HideBanner = true
 	e.Debug = app.debug
@@ -44,7 +44,7 @@ func (app *application) newServer() http.Handler {
 		e.IPExtractor = extractIPFromCloudflareHeader()
 	}
 
-	e.Use(app.middlewareRequestLogger())
+	e.Use(app.middlewareRequestLogger(ctx))
 	e.Use(middleware.Secure())
 	e.Use(app.middlewareRecover())
 

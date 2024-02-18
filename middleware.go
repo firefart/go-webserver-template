@@ -18,7 +18,7 @@ func (app *application) middlewareRecover() echo.MiddlewareFunc {
 	})
 }
 
-func (app *application) middlewareRequestLogger() echo.MiddlewareFunc {
+func (app *application) middlewareRequestLogger(ctx context.Context) echo.MiddlewareFunc {
 	return middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogStatus:        true,
 		LogURI:           true,
@@ -38,7 +38,7 @@ func (app *application) middlewareRequestLogger() echo.MiddlewareFunc {
 				errString = v.Error.Error()
 				logLevel = slog.LevelError
 			}
-			app.logger.LogAttrs(context.Background(), logLevel, "REQUEST",
+			app.logger.LogAttrs(ctx, logLevel, "REQUEST",
 				slog.String("ip", v.RemoteIP),
 				slog.String("method", v.Method),
 				slog.String("uri", v.URI),

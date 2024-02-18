@@ -82,7 +82,7 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debug 
 
 	srv := &http.Server{
 		Addr:    config.Server.Listen,
-		Handler: app.newServer(),
+		Handler: app.newServer(ctx),
 	}
 
 	go func() {
