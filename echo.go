@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"io/fs"
 	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -78,6 +80,15 @@ func (app *application) customHTTPErrorHandler(err error, c echo.Context) {
 
 	// send error page
 	errorPage := fmt.Sprintf("error_pages/HTTP%d.html", code)
+	if _, err := fs.Stat(errorPages, errorPage); err == nil {
+		// file exists, no further processing
+	} else if errors.Is(err, os.ErrNotExist) {
+		errorPage = "error_pages/HTTP500.html"
+	} else {
+		app.logger.Error("could not check if file exists", slog.String("err", err.Error()))
+		errorPage = "error_pages/HTTP500.html"
+	}
+
 	content, err2 := errorPages.ReadFile(errorPage)
 	if err2 != nil {
 		app.logger.Error("could not read error page", slog.String("err", err2.Error()))
