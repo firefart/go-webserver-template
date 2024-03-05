@@ -80,9 +80,17 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debug 
 
 	app.cache = NewCache[string](ctx, logger, "cache", config.Cache.Timeout)
 
+	tlsConfig, err := app.setupTLSConfig()
+	if err != nil {
+		return err
+	}
+
 	srv := &http.Server{
-		Addr:    config.Server.Listen,
-		Handler: app.newServer(ctx),
+		Addr:         config.Server.Listen,
+		Handler:      app.newServer(ctx),
+		TLSConfig:    tlsConfig,
+		ReadTimeout:  config.Timeout,
+		WriteTimeout: config.Timeout,
 	}
 
 	go func() {

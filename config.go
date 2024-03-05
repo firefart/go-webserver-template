@@ -22,6 +22,8 @@ type ConfigServer struct {
 	Listen          string        `koanf:"listen"`
 	PprofListen     string        `koanf:"listen_pprof"`
 	GracefulTimeout time.Duration `koanf:"graceful_timeout"`
+	RootCA          string        `koanf:"root_ca"`
+	CertSubject     string        `koanf:"cert_subject"`
 }
 
 type ConfigCache struct {
