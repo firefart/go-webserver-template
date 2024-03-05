@@ -12,6 +12,9 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/firefart/go-webserver-template/internal/config"
+	"github.com/firefart/go-webserver-template/internal/database"
+
 	"github.com/nikoksr/notify"
 
 	_ "net/http/pprof"
@@ -25,9 +28,10 @@ var cloudflareIPHeaderName = http.CanonicalHeaderKey("CF-Connecting-IP")
 type application struct {
 	logger *slog.Logger
 	debug  bool
-	config Configuration
+	config config.Configuration
 	cache  *Cache[string]
 	notify *notify.Notify
+	db     *database.Database
 }
 
 func main() {
@@ -60,37 +64,48 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debug 
 		return fmt.Errorf("please provide a config file")
 	}
 
-	config, err := GetConfig(configFilename)
+	configuration, err := config.GetConfig(configFilename)
 	if err != nil {
 		return err
 	}
-	app.config = config
+	app.config = configuration
 
-	app.notify, err = setupNotifications(config, logger)
+	app.notify, err = setupNotifications(configuration, logger)
 	if err != nil {
 		return err
 	}
 
-	app.logger.Info("Starting server",
-		slog.String("host", config.Server.Listen),
-		slog.Duration("gracefultimeout", config.Server.GracefulTimeout),
-		slog.Duration("timeout", config.Timeout),
-		slog.Bool("debug", app.debug),
-	)
+	db, err := database.New(configuration)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := db.Close(); err != nil {
+			app.logger.Error("error on database close", slog.String("err", err.Error()))
+		}
+	}()
+	app.db = db
 
-	app.cache = NewCache[string](ctx, logger, "cache", config.Cache.Timeout)
+	app.cache = NewCache[string](ctx, logger, "cache", configuration.Cache.Timeout)
 
 	tlsConfig, err := app.setupTLSConfig()
 	if err != nil {
 		return err
 	}
 
+	app.logger.Info("Starting server",
+		slog.String("host", configuration.Server.Listen),
+		slog.Duration("gracefultimeout", configuration.Server.GracefulTimeout),
+		slog.Duration("timeout", configuration.Timeout),
+		slog.Bool("debug", app.debug),
+	)
+
 	srv := &http.Server{
-		Addr:         config.Server.Listen,
+		Addr:         configuration.Server.Listen,
 		Handler:      app.newServer(ctx),
 		TLSConfig:    tlsConfig,
-		ReadTimeout:  config.Timeout,
-		WriteTimeout: config.Timeout,
+		ReadTimeout:  configuration.Timeout,
+		WriteTimeout: configuration.Timeout,
 	}
 
 	go func() {
@@ -126,7 +141,7 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debug 
 		<-ctx.Done()
 		app.logger.Info("received shutdown signal")
 		// create a new context for shutdown
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), config.Server.GracefulTimeout)
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), configuration.Server.GracefulTimeout)
 		defer cancel()
 		if err := srv.Shutdown(shutdownCtx); err != nil {
 			app.logger.Error("error on srv shutdown", slog.String("err", err.Error()))
