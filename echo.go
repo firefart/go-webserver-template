@@ -17,7 +17,7 @@ import (
 )
 
 //go:embed templates
-//go:embed assets
+//go:embed assets/web
 var staticFS embed.FS
 
 //go:embed error_pages
