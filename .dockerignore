@@ -12,3 +12,4 @@ images/
 *.env
 .idea/
 .devcontainer/
+tmp/
