@@ -7,12 +7,12 @@ require (
 	github.com/knadh/koanf/providers/file v0.1.0
 	github.com/knadh/koanf/providers/structs v0.1.0
 	github.com/knadh/koanf/v2 v2.1.1
-	github.com/labstack/echo/v4 v4.11.4
+	github.com/labstack/echo/v4 v4.12.0
 	github.com/lmittmann/tint v1.0.4
 	github.com/mattn/go-isatty v0.0.20
 	github.com/nikoksr/notify v0.41.0
 	go.uber.org/automaxprocs v1.5.3
-	modernc.org/sqlite v1.29.6
+	modernc.org/sqlite v1.29.7
 )
 
 require (
