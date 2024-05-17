@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 FROM golang:latest AS build-env
 WORKDIR /src
 ENV CGO_ENABLED=0
