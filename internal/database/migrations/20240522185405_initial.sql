@@ -1,0 +1,15 @@
+-- +goose Up
+-- +goose StatementBegin
+CREATE TABLE DUMMY (
+  ID INTEGER NOT NULL PRIMARY KEY,
+  NAME TEXT NOT NULL UNIQUE,
+  UPDATED DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IDX_NAME ON DUMMY(NAME);
+-- +goose StatementEnd
+
+-- +goose Down
+-- +goose StatementBegin
+DROP INDEX IDX_NAME;
+DROP TABLE DUMMY;
+-- +goose StatementEnd

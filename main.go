@@ -75,7 +75,7 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debug 
 		return err
 	}
 
-	db, err := database.New(configuration)
+	db, err := database.New(ctx, configuration, logger)
 	if err != nil {
 		return err
 	}

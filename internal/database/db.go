@@ -1,24 +1,23 @@
 package database
 
 import (
+	"context"
 	"database/sql"
+	"embed"
 	"errors"
 	"fmt"
+	"io/fs"
+	"log/slog"
 	"strings"
 
 	"github.com/firefart/go-webserver-template/internal/config"
+	"github.com/pressly/goose/v3"
 
 	_ "modernc.org/sqlite"
 )
 
-const create string = `
-	CREATE TABLE IF NOT EXISTS DUMMY (
-		ID INTEGER NOT NULL PRIMARY KEY,
-		NAME TEXT NOT NULL,
-	) STRICT;
-	CREATE UNIQUE INDEX IF NOT EXISTS IDX_NAME
-	ON DUMMY(NAME);
-`
+//go:embed migrations/*.sql
+var embedMigrations embed.FS
 
 var ErrNotFound = errors.New("record not found in database")
 
@@ -27,19 +26,20 @@ type Database struct {
 	writer *sql.DB
 }
 
-func New(configuration config.Configuration) (*Database, error) {
+func New(ctx context.Context, configuration config.Configuration, logger *slog.Logger) (*Database, error) {
 	if strings.ToLower(configuration.Database.Filename) == ":memory:" {
 		// not possible because of the two db instances, with in memory they
 		// would be separate instances
 		return nil, fmt.Errorf("in memory databases are not supported")
 	}
 
-	reader, err := newDatabase(configuration)
+	reader, err := newDatabase(ctx, configuration, logger, true)
 	if err != nil {
 		return nil, fmt.Errorf("could not create reader: %w", err)
 	}
 	reader.SetMaxOpenConns(100)
-	writer, err := newDatabase(configuration)
+	// no migrations on the second connection
+	writer, err := newDatabase(ctx, configuration, logger, false)
 	if err != nil {
 		return nil, fmt.Errorf("could not create writer: %w", err)
 	}
@@ -53,14 +53,44 @@ func New(configuration config.Configuration) (*Database, error) {
 	}, nil
 }
 
-func newDatabase(configuration config.Configuration) (*sql.DB, error) {
+func newDatabase(ctx context.Context, configuration config.Configuration, logger *slog.Logger, skipMigrations bool) (*sql.DB, error) {
 	db, err := sql.Open("sqlite", fmt.Sprintf("%s?_pragma=journal_mode(WAL)", configuration.Database.Filename))
 	if err != nil {
 		return nil, fmt.Errorf("could not open database %s: %w", configuration.Database, err)
 	}
 
-	if _, err := db.Exec(create); err != nil {
-		return nil, fmt.Errorf("could not create tables: %w", err)
+	// we have a reader and a writer so no need to apply all migrations twice
+	if !skipMigrations {
+		migrationFS, err := fs.Sub(embedMigrations, "migrations")
+		if err != nil {
+			return nil, fmt.Errorf("could not sub migration fs: %w", err)
+		}
+
+		prov, err := goose.NewProvider("sqlite3", db, migrationFS)
+		if err != nil {
+			return nil, fmt.Errorf("could not create goose provider: %w", err)
+		}
+
+		result, err := prov.Up(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("could not apply migrations: %w", err)
+		}
+
+		for _, r := range result {
+			if r.Error != nil {
+				return nil, fmt.Errorf("could not apply migration %s: %w", r.Source.Path, r.Error)
+			}
+		}
+
+		if len(result) > 0 {
+			logger.Info(fmt.Sprintf("Applied %d database migrations", len(result)))
+		}
+
+		version, err := prov.GetDBVersion(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("could not get current database version: %w", err)
+		}
+		logger.Info("Database setup", slog.Int64("version", version))
 	}
 
 	// shrink and defrag the database (must be run before the checkpoint)
