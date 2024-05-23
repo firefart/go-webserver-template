@@ -54,7 +54,7 @@ func New(ctx context.Context, configuration config.Configuration, logger *slog.L
 }
 
 func newDatabase(ctx context.Context, configuration config.Configuration, logger *slog.Logger, skipMigrations bool) (*sql.DB, error) {
-	db, err := sql.Open("sqlite", fmt.Sprintf("%s?_pragma=journal_mode(WAL)", configuration.Database.Filename))
+	db, err := sql.Open("sqlite", fmt.Sprintf("%s?_pragma=journal_mode(WAL)&_pragma=foreign_keys(1)", configuration.Database))
 	if err != nil {
 		return nil, fmt.Errorf("could not open database %s: %w", configuration.Database, err)
 	}
