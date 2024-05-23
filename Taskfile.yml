@@ -25,10 +25,12 @@ tasks:
       - go test -race -cover ./...
 
   run:
+    deps: [build]
     cmds:
       - go run . -debug -config config.json
 
   run-json:
+    deps: [build]
     cmds:
       - go run . -debug -config config.json -json
 
