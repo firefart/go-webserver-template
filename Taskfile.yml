@@ -4,6 +4,10 @@ vars:
   PROGRAM: template
 
 tasks:
+  deps:
+    cmds:
+      - go mod tidy -v
+
   update:
     cmds:
       - go get -u
@@ -11,6 +15,7 @@ tasks:
 
   build:
     aliases: [default]
+    deps: [deps]
     env:
       CGO_ENABLED: 0
     cmds:
@@ -19,6 +24,7 @@ tasks:
       - go build -o {{.PROGRAM}}
 
   test:
+    deps: [deps]
     env:
       CGO_ENABLED: 1 # required by -race
     cmds:
