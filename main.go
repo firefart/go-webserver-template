@@ -14,6 +14,7 @@ import (
 
 	"github.com/firefart/go-webserver-template/internal/config"
 	"github.com/firefart/go-webserver-template/internal/database"
+	"github.com/firefart/go-webserver-template/internal/server"
 
 	"github.com/nikoksr/notify"
 
@@ -100,9 +101,14 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debug 
 		slog.Bool("debug", app.debug),
 	)
 
+	s, err := server.NewServer(app.logger, app.config, app.db, app.notify, app.debug)
+	if err != nil {
+		return fmt.Errorf("could not create server: %w", err)
+	}
+
 	srv := &http.Server{
 		Addr:         configuration.Server.Listen,
-		Handler:      app.newServer(ctx),
+		Handler:      s.EchoServer(ctx),
 		TLSConfig:    tlsConfig,
 		ReadTimeout:  configuration.Timeout,
 		WriteTimeout: configuration.Timeout,

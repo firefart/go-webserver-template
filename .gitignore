@@ -22,10 +22,19 @@
 # Go workspace file
 go.work
 
-tmp/
+template
 
 config.json
-!config_sample.json
+!config.sample.json
 *.secret
 *.env
-template
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-shm
+*.sqlite3-whl
+*.sqlite3-wal
+.vscode/
+tmp/
+node_modules/
+package.json
+package-lock.json

@@ -37,12 +37,13 @@ type ConfigDatabase struct {
 }
 
 type ConfigNotification struct {
-	SecretKeyHeader string                     `koanf:"secret_key_header"`
-	Telegram        ConfigNotificationTelegram `koanf:"telegram"`
-	Discord         ConfigNotificationDiscord  `koanf:"discord"`
-	Email           ConfigNotificationEmail    `koanf:"email"`
-	SendGrid        ConfigNotificationSendGrid `koanf:"sendgrid"`
-	MSTeams         ConfigNotificationMSTeams  `koanf:"msteams"`
+	SecretKeyHeaderName  string                     `koanf:"secret_key_header_name"`
+	SecretKeyHeaderValue string                     `koanf:"secret_key_header_value"`
+	Telegram             ConfigNotificationTelegram `koanf:"telegram"`
+	Discord              ConfigNotificationDiscord  `koanf:"discord"`
+	Email                ConfigNotificationEmail    `koanf:"email"`
+	SendGrid             ConfigNotificationSendGrid `koanf:"sendgrid"`
+	MSTeams              ConfigNotificationMSTeams  `koanf:"msteams"`
 }
 
 type ConfigNotificationTelegram struct {
@@ -85,6 +86,12 @@ var defaultConfig = Configuration{
 		Enabled: true,
 		Timeout: 1 * time.Hour,
 	},
+	Notifications: ConfigNotification{
+		SecretKeyHeaderName: "X-Secret-Key-Header",
+	},
+	Database: ConfigDatabase{
+		Filename: "db.sqlite3",
+	},
 	Timeout:    5 * time.Second,
 	Cloudflare: false,
 }
@@ -107,8 +114,12 @@ func GetConfig(f string) (Configuration, error) {
 		return Configuration{}, err
 	}
 
-	if config.Notifications.SecretKeyHeader == "" {
-		return Configuration{}, fmt.Errorf("please supply a secret key header in the config")
+	if config.Notifications.SecretKeyHeaderName == "" {
+		return Configuration{}, fmt.Errorf("please supply a secret key header name in the config")
+	}
+
+	if config.Notifications.SecretKeyHeaderValue == "" {
+		return Configuration{}, fmt.Errorf("please supply a secret key header value in the config")
 	}
 
 	return config, nil

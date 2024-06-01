@@ -13,9 +13,23 @@ tasks:
       - go get -u
       - go mod tidy -v
 
+  templ:
+    cmds:
+      - templ generate
+
+  setup:
+    cmds:
+      - go install github.com/a-h/templ/cmd/templ@latest
+      - go install github.com/cosmtrek/air@latest
+      - go install github.com/pressly/goose/v3/cmd/goose@latest
+      - npm i -D tailwindcss@latest
+      - npm i -D @tailwindcss/forms
+      - npm i -D @tailwindcss/typography
+      - npm i -D daisyui@latest
+
   build:
     aliases: [default]
-    deps: [deps]
+    deps: [deps, templ, tailwind]
     env:
       CGO_ENABLED: 0
     cmds:
@@ -24,7 +38,7 @@ tasks:
       - go build -o {{.PROGRAM}}
 
   test:
-    deps: [deps]
+    deps: [deps, templ]
     env:
       CGO_ENABLED: 1 # required by -race
     cmds:
@@ -33,12 +47,15 @@ tasks:
   run:
     deps: [build]
     cmds:
-      - go run . -debug -config config.json
+      - ./{{.PROGRAM}} -debug -config config.json
 
-  run-json:
-    deps: [build]
+  htmx-update:
     cmds:
-      - go run . -debug -config config.json -json
+      - wget -nv -O ./internal/server/assets/web/scripts/htmx.min.js https://unpkg.com/htmx.org@latest/dist/htmx.min.js
+
+  tailwind:
+    cmds:
+      - npx tailwindcss -o ./internal/server/assets/web/css/style.min.css --minify
 
   lint:
     cmds:
@@ -52,9 +69,3 @@ tasks:
     vars:
       GOPATH:
         sh: go env GOPATH
-
-  docker-update:
-    cmds:
-      - docker pull golang:latest
-      - docker pull scratch:latest
-      - docker build --tag {{.PROGRAM}}:dev .

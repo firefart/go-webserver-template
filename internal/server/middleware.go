@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func (app *application) middlewareRecover() echo.MiddlewareFunc {
+func (s *Server) middlewareRecover() echo.MiddlewareFunc {
 	return middleware.RecoverWithConfig(middleware.RecoverConfig{
 		LogErrorFunc: func(c echo.Context, err error, stack []byte) error {
 			// send the error to the default error handler
@@ -18,7 +18,7 @@ func (app *application) middlewareRecover() echo.MiddlewareFunc {
 	})
 }
 
-func (app *application) middlewareRequestLogger(ctx context.Context) echo.MiddlewareFunc {
+func (s *Server) middlewareRequestLogger(ctx context.Context) echo.MiddlewareFunc {
 	return middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogStatus:        true,
 		LogURI:           true,
@@ -38,7 +38,7 @@ func (app *application) middlewareRequestLogger(ctx context.Context) echo.Middle
 				errString = v.Error.Error()
 				logLevel = slog.LevelError
 			}
-			app.logger.LogAttrs(ctx, logLevel, "REQUEST",
+			s.logger.LogAttrs(ctx, logLevel, "REQUEST",
 				slog.String("ip", v.RemoteIP),
 				slog.String("method", v.Method),
 				slog.String("uri", v.URI),

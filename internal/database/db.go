@@ -21,10 +21,17 @@ var embedMigrations embed.FS
 
 var ErrNotFound = errors.New("record not found in database")
 
+type DatabaseInterface interface {
+	Close() error
+}
+
 type Database struct {
 	reader *sql.DB
 	writer *sql.DB
 }
+
+// compile time check that struct implements the interface
+var _ DatabaseInterface = (*Database)(nil)
 
 func New(ctx context.Context, configuration config.Configuration, logger *slog.Logger) (*Database, error) {
 	if strings.ToLower(configuration.Database.Filename) == ":memory:" {
@@ -54,9 +61,9 @@ func New(ctx context.Context, configuration config.Configuration, logger *slog.L
 }
 
 func newDatabase(ctx context.Context, configuration config.Configuration, logger *slog.Logger, skipMigrations bool) (*sql.DB, error) {
-	db, err := sql.Open("sqlite", fmt.Sprintf("%s?_pragma=journal_mode(WAL)&_pragma=foreign_keys(1)", configuration.Database))
+	db, err := sql.Open("sqlite", fmt.Sprintf("%s?_pragma=journal_mode(WAL)&_pragma=foreign_keys(1)", configuration.Database.Filename))
 	if err != nil {
-		return nil, fmt.Errorf("could not open database %s: %w", configuration.Database, err)
+		return nil, fmt.Errorf("could not open database %s: %w", configuration.Database.Filename, err)
 	}
 
 	// we have a reader and a writer so no need to apply all migrations twice
