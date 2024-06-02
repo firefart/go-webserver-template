@@ -23,9 +23,6 @@ import (
 	_ "go.uber.org/automaxprocs"
 )
 
-var secretKeyHeaderName = http.CanonicalHeaderKey("X-Secret-Key-Header")
-var cloudflareIPHeaderName = http.CanonicalHeaderKey("CF-Connecting-IP")
-
 type application struct {
 	logger *slog.Logger
 	debug  bool
