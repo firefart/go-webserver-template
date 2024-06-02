@@ -41,7 +41,7 @@ func header(title string, debug bool) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if debug {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script src=\"https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.12/htmx.min.js\" integrity=\"sha512-JvpjarJlOl4sW26MnEb3IdSAcGdeTeOaAlu2gUZtfFrRgnChdzELOZKl0mN6ZvI0X+xiX5UMvxjK2Rx2z/fliw==\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\"></script> <link href=\"https://cdn.jsdelivr.net/npm/daisyui@4.11.1/dist/full.min.css\" rel=\"stylesheet\" type=\"text/css\"><script src=\"https://cdn.tailwindcss.com\"></script>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script src=\"https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.12/htmx.min.js\" integrity=\"sha512-JvpjarJlOl4sW26MnEb3IdSAcGdeTeOaAlu2gUZtfFrRgnChdzELOZKl0mN6ZvI0X+xiX5UMvxjK2Rx2z/fliw==\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\"></script> <link href=\"https://cdn.jsdelivr.net/npm/daisyui@4.11.1/dist/full.min.css\" rel=\"stylesheet\" type=\"text/css\"><script src=\"https://cdn.tailwindcss.com?plugins=forms,typography\"></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
