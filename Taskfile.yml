@@ -20,7 +20,7 @@ tasks:
   setup:
     cmds:
       - go install github.com/a-h/templ/cmd/templ@latest
-      - go install github.com/cosmtrek/air@latest
+      - go install github.com/air-verse/air@latest
       - go install github.com/pressly/goose/v3/cmd/goose@latest
       - npm i -D tailwindcss@latest
       - npm i -D @tailwindcss/forms
