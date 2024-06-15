@@ -14,7 +14,7 @@ func newLogger(debugMode, jsonOutput bool) *slog.Logger {
 	var level = new(slog.LevelVar)
 	level.Set(slog.LevelInfo)
 
-	var replaceFunc func(groups []string, a slog.Attr) slog.Attr = nil
+	var replaceFunc func(groups []string, a slog.Attr) slog.Attr
 	if debugMode {
 		level.Set(slog.LevelDebug)
 		// add source file information
@@ -22,7 +22,7 @@ func newLogger(debugMode, jsonOutput bool) *slog.Logger {
 		if err != nil {
 			panic("unable to determine working directory")
 		}
-		replaceFunc = func(groups []string, a slog.Attr) slog.Attr {
+		replaceFunc = func(_ []string, a slog.Attr) slog.Attr {
 			if a.Key == slog.SourceKey {
 				source := a.Value.Any().(*slog.Source)
 				// remove current working directory and only leave the relative path to the program
