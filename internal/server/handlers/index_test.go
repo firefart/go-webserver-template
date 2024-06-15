@@ -13,6 +13,7 @@ import (
 	"github.com/firefart/go-webserver-template/internal/database"
 	"github.com/firefart/go-webserver-template/internal/server"
 	"github.com/firefart/go-webserver-template/internal/server/handlers"
+	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,12 +23,12 @@ func TestIndexMock(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	c := config.Configuration{}
 
-	s, err := server.NewServer(logger, c, db, nil, false)
-	require.Nil(t, err)
-	e := s.EchoServer(ctx)
+	e := server.NewServer(ctx, logger, c, db, nil, false)
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
-	cont := e.NewContext(req, rec)
+	x, ok := e.(*echo.Echo)
+	require.True(t, ok)
+	cont := x.NewContext(req, rec)
 	require.Nil(t, handlers.NewIndexHandler(true).EchoHandler(cont))
 	require.Equal(t, http.StatusOK, rec.Code)
 	require.Greater(t, len(rec.Body.String()), 10)
@@ -52,12 +53,12 @@ func TestIndex(t *testing.T) {
 	db, err := database.New(ctx, configuration, logger)
 	require.Nil(t, err)
 
-	s, err := server.NewServer(logger, configuration, db, nil, false)
-	require.Nil(t, err)
-	e := s.EchoServer(ctx)
+	e := server.NewServer(ctx, logger, configuration, db, nil, false)
+	x, ok := e.(*echo.Echo)
+	require.True(t, ok)
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
-	cont := e.NewContext(req, rec)
+	cont := x.NewContext(req, rec)
 	require.Nil(t, handlers.NewIndexHandler(true).EchoHandler(cont))
 	require.Equal(t, http.StatusOK, rec.Code)
 	require.Greater(t, len(rec.Body.String()), 10)

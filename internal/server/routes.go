@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (s *Server) addRoutes(e *echo.Echo) {
+func (s *server) addRoutes(e *echo.Echo) {
 	var secretKeyHeaderName = http.CanonicalHeaderKey(s.config.Notifications.SecretKeyHeaderName)
 
 	static := echo.MustSubFS(fsAssets, "assets/web")

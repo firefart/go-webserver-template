@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func (s *Server) middlewareRecover() echo.MiddlewareFunc {
+func (s *server) middlewareRecover() echo.MiddlewareFunc {
 	return middleware.RecoverWithConfig(middleware.RecoverConfig{
 		LogErrorFunc: func(c echo.Context, err error, stack []byte) error {
 			// send the error to the default error handler
@@ -18,7 +18,7 @@ func (s *Server) middlewareRecover() echo.MiddlewareFunc {
 	})
 }
 
-func (s *Server) middlewareRequestLogger(ctx context.Context) echo.MiddlewareFunc {
+func (s *server) middlewareRequestLogger(ctx context.Context) echo.MiddlewareFunc {
 	return middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogStatus:        true,
 		LogURI:           true,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"log/slog"
+	"net/http"
 
 	"github.com/firefart/go-webserver-template/internal/config"
 	"github.com/firefart/go-webserver-template/internal/database"
@@ -12,7 +13,7 @@ import (
 	"github.com/nikoksr/notify"
 )
 
-type Server struct {
+type server struct {
 	logger *slog.Logger
 	config config.Configuration
 	db     database.DatabaseInterface
@@ -23,17 +24,15 @@ type Server struct {
 //go:embed assets
 var fsAssets embed.FS
 
-func NewServer(logger *slog.Logger, config config.Configuration, db database.DatabaseInterface, notify *notify.Notify, debug bool) (*Server, error) {
-	return &Server{
+func NewServer(ctx context.Context, logger *slog.Logger, config config.Configuration, db database.DatabaseInterface, notify *notify.Notify, debug bool) http.Handler {
+	s := server{
 		logger: logger,
 		config: config,
 		notify: notify,
 		debug:  debug,
 		db:     db,
-	}, nil
-}
+	}
 
-func (s *Server) EchoServer(ctx context.Context) *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true
 	e.Debug = s.debug

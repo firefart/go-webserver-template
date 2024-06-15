@@ -14,7 +14,7 @@ import (
 
 var cloudflareIPHeaderName = http.CanonicalHeaderKey("CF-Connecting-IP")
 
-func (s *Server) customHTTPErrorHandler(err error, c echo.Context) {
+func (s *server) customHTTPErrorHandler(err error, c echo.Context) {
 	if c.Response().Committed {
 		return
 	}

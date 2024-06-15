@@ -98,14 +98,11 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debug 
 		slog.Bool("debug", app.debug),
 	)
 
-	s, err := server.NewServer(app.logger, app.config, app.db, app.notify, app.debug)
-	if err != nil {
-		return fmt.Errorf("could not create server: %w", err)
-	}
+	s := server.NewServer(ctx, app.logger, app.config, app.db, app.notify, app.debug)
 
 	srv := &http.Server{
 		Addr:         configuration.Server.Listen,
-		Handler:      s.EchoServer(ctx),
+		Handler:      s,
 		TLSConfig:    tlsConfig,
 		ReadTimeout:  configuration.Timeout,
 		WriteTimeout: configuration.Timeout,
