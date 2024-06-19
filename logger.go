@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/lmittmann/tint"
+	"github.com/charmbracelet/log"
 	"github.com/mattn/go-isatty"
 )
 
@@ -35,20 +35,24 @@ func newLogger(debugMode, jsonOutput bool) *slog.Logger {
 	}
 
 	var handler slog.Handler
+	slogHandlerOpts := &slog.HandlerOptions{
+		Level:       level,
+		AddSource:   debugMode,
+		ReplaceAttr: replaceFunc,
+	}
 	if jsonOutput {
-		handler = slog.NewJSONHandler(w, &slog.HandlerOptions{
-			Level:       level,
-			AddSource:   debugMode,
-			ReplaceAttr: replaceFunc,
-		})
+		handler = slog.NewJSONHandler(w, slogHandlerOpts)
+	} else if !isatty.IsTerminal(w.Fd()) {
+		handler = slog.NewTextHandler(w, slogHandlerOpts)
 	} else {
-		textOptions := &tint.Options{
-			Level:       level,
-			NoColor:     !isatty.IsTerminal(w.Fd()),
-			AddSource:   debugMode,
-			ReplaceAttr: replaceFunc,
+		l := log.InfoLevel
+		if debugMode {
+			l = log.DebugLevel
 		}
-		handler = tint.NewHandler(w, textOptions)
+		handler = log.NewWithOptions(w, log.Options{
+			Level:        l,
+			ReportCaller: debugMode,
+		})
 	}
 	return slog.New(handler)
 }
