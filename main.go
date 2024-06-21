@@ -20,7 +20,7 @@ import (
 
 	_ "net/http/pprof"
 
-	_ "go.uber.org/automaxprocs"
+	"go.uber.org/automaxprocs/maxprocs"
 )
 
 type application struct {
@@ -30,6 +30,13 @@ type application struct {
 	cache  *Cache[string]
 	notify *notify.Notify
 	db     *database.Database
+}
+
+func init() {
+	// added in init to prevent the forced logline
+	if _, err := maxprocs.Set(); err != nil {
+		panic(fmt.Sprintf("Error on gomaxprocs: %v\n", err))
+	}
 }
 
 func main() {
