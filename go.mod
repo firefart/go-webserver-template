@@ -3,7 +3,7 @@ module github.com/firefart/go-webserver-template
 go 1.22
 
 require (
-	github.com/a-h/templ v0.2.707
+	github.com/a-h/templ v0.2.731
 	github.com/charmbracelet/log v0.4.0
 	github.com/knadh/koanf/parsers/json v0.1.0
 	github.com/knadh/koanf/providers/file v0.1.0
