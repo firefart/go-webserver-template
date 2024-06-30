@@ -93,11 +93,6 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debug 
 
 	app.cache = NewCache[string](ctx, logger, "cache", configuration.Cache.Timeout)
 
-	tlsConfig, err := app.setupTLSConfig()
-	if err != nil {
-		return err
-	}
-
 	app.logger.Info("Starting server",
 		slog.String("host", configuration.Server.Listen),
 		slog.Duration("gracefultimeout", configuration.Server.GracefulTimeout),
@@ -110,18 +105,33 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debug 
 	srv := &http.Server{
 		Addr:         configuration.Server.Listen,
 		Handler:      s,
-		TLSConfig:    tlsConfig,
 		ReadTimeout:  configuration.Timeout,
 		WriteTimeout: configuration.Timeout,
 	}
 
-	go func() {
-		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			app.logger.Error("error on listenandserve", slog.String("err", err.Error()))
-			// emit signal to kill server
-			cancel()
+	if configuration.Server.TLS.PublicKey != "" && configuration.Server.TLS.PrivateKey != "" {
+		tlsConfig, err := app.setupTLSConfig()
+		if err != nil {
+			return err
 		}
-	}()
+		srv.TLSConfig = tlsConfig
+
+		go func() {
+			if err := srv.ListenAndServeTLS(configuration.Server.TLS.PublicKey, configuration.Server.TLS.PrivateKey); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				app.logger.Error("error on listenandserveTLS", slog.String("err", err.Error()))
+				// emit signal to kill server
+				cancel()
+			}
+		}()
+	} else {
+		go func() {
+			if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				app.logger.Error("error on listenandserve", slog.String("err", err.Error()))
+				// emit signal to kill server
+				cancel()
+			}
+		}()
+	}
 
 	app.logger.Info("Starting pprof server",
 		slog.String("host", app.config.Server.PprofListen),

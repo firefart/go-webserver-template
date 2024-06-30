@@ -23,8 +23,14 @@ type ConfigServer struct {
 	Listen          string        `koanf:"listen"`
 	PprofListen     string        `koanf:"listen_pprof"`
 	GracefulTimeout time.Duration `koanf:"graceful_timeout"`
-	RootCA          string        `koanf:"root_ca"`
-	CertSubject     string        `koanf:"cert_subject"`
+	TLS             ConfigTLS     `koanf:"tls"`
+}
+
+type ConfigTLS struct {
+	PublicKey       string `koanf:"public_key"`
+	PrivateKey      string `koanf:"private_key"`
+	MTLSRootCA      string `koanf:"mtls_root_ca"`
+	MTLSCertSubject string `koanf:"mtls_cert_subject"`
 }
 
 type ConfigCache struct {
