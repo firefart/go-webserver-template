@@ -1,7 +1,6 @@
 package database
 
-type MockDB struct {
-}
+type MockDB struct{}
 
 func NewMockDB() *MockDB {
 	mockDB := MockDB{}

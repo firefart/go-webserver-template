@@ -100,7 +100,14 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debug 
 		slog.Bool("debug", app.debug),
 	)
 
-	s := server.NewServer(ctx, app.logger, app.config, app.db, app.notify, app.debug)
+	s := server.NewServer(
+		ctx,
+		server.WithLogger(app.logger),
+		server.WithConfig(app.config),
+		server.WithDB(app.db),
+		server.WithNotify(app.notify),
+		server.WithDebug(app.debug),
+	)
 
 	srv := &http.Server{
 		Addr:         configuration.Server.Listen,

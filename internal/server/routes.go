@@ -8,7 +8,7 @@ import (
 )
 
 func (s *server) addRoutes(e *echo.Echo) {
-	var secretKeyHeaderName = http.CanonicalHeaderKey(s.config.Notifications.SecretKeyHeaderName)
+	secretKeyHeaderName := http.CanonicalHeaderKey(s.config.Notifications.SecretKeyHeaderName)
 
 	static := echo.MustSubFS(fsAssets, "assets/web")
 	e.FileFS("/robots.txt", "robots.txt", static)

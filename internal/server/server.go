@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"embed"
+	"io"
 	"log/slog"
 	"net/http"
 
@@ -24,13 +25,15 @@ type server struct {
 //go:embed assets
 var fsAssets embed.FS
 
-func NewServer(ctx context.Context, logger *slog.Logger, config config.Configuration, db database.DatabaseInterface, notify *notify.Notify, debug bool) http.Handler {
+func NewServer(ctx context.Context, opts ...OptionsServerFunc) http.Handler {
+	// func NewServer(ctx context.Context, logger *slog.Logger, config config.Configuration, db database.DatabaseInterface, notify *notify.Notify, debug bool) http.Handler {
 	s := server{
-		logger: logger,
-		config: config,
-		notify: notify,
-		debug:  debug,
-		db:     db,
+		logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
+		debug:  false,
+	}
+
+	for _, o := range opts {
+		o(&s)
 	}
 
 	e := echo.New()

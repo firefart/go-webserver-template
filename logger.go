@@ -11,7 +11,7 @@ import (
 
 func newLogger(debugMode, jsonOutput bool) *slog.Logger {
 	w := os.Stdout
-	var level = new(slog.LevelVar)
+	level := new(slog.LevelVar)
 	level.Set(slog.LevelInfo)
 
 	var replaceFunc func(groups []string, a slog.Attr) slog.Attr

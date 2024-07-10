@@ -20,10 +20,7 @@ import (
 func TestIndexMock(t *testing.T) {
 	ctx := context.Background()
 	db := database.NewMockDB()
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	c := config.Configuration{}
-
-	e := server.NewServer(ctx, logger, c, db, nil, false)
+	e := server.NewServer(ctx, server.WithDB(db))
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 	x, ok := e.(*echo.Echo)
@@ -53,7 +50,7 @@ func TestIndex(t *testing.T) {
 	db, err := database.New(ctx, configuration, logger)
 	require.Nil(t, err)
 
-	e := server.NewServer(ctx, logger, configuration, db, nil, false)
+	e := server.NewServer(ctx, server.WithConfig(configuration), server.WithDB(db))
 	x, ok := e.(*echo.Echo)
 	require.True(t, ok)
 	req := httptest.NewRequest(http.MethodGet, "/", nil)

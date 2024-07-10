@@ -103,7 +103,7 @@ var defaultConfig = Configuration{
 }
 
 func GetConfig(f string) (Configuration, error) {
-	var k = koanf.NewWithConf(koanf.Conf{
+	k := koanf.NewWithConf(koanf.Conf{
 		Delim: ".",
 	})
 
