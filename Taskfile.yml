@@ -9,6 +9,7 @@ tasks:
       - go mod tidy -v
 
   update:
+    deps: [htmx-update, templ]
     cmds:
       - go get -u
       - go mod tidy -v
