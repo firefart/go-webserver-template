@@ -22,9 +22,11 @@ jobs:
       - name: Install Task
         uses: arduino/setup-task@v2
 
+      - name: setup
+        run: task setup
+
       - name: update
-        run: |
-          task update
+        run: task update
 
       - name: setup git config
         run: |
