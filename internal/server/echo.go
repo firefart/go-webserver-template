@@ -42,10 +42,10 @@ func (s *server) customHTTPErrorHandler(err error, c echo.Context) {
 	if _, err := fs.Stat(fsAssets, errorPage); err == nil {
 		// file exists, no further processing
 	} else if errors.Is(err, os.ErrNotExist) {
-		errorPage = "error_pages/HTTP500.html"
+		errorPage = "assets/error_pages/HTTP500.html"
 	} else {
 		s.logger.Error("could not check if file exists", slog.String("err", err.Error()))
-		errorPage = "error_pages/HTTP500.html"
+		errorPage = "assets/error_pages/HTTP500.html"
 	}
 
 	content, err2 := fsAssets.ReadFile(errorPage)
