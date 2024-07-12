@@ -44,7 +44,7 @@ func header(title string, debug bool) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if debug {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script src=\"https://unpkg.com/htmx.org@latest/dist/htmx.min.js\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\"></script> <link href=\"https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.min.css\" rel=\"stylesheet\" type=\"text/css\"><script src=\"https://cdn.tailwindcss.com?plugins=forms,typography\"></script>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script src=\"https://unpkg.com/htmx.org@latest/dist/htmx.min.js\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\"></script> <link href=\"https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.min.css\" rel=\"stylesheet\" type=\"text/css\"><script src=\"https://cdn.tailwindcss.com?plugins=typography\"></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
