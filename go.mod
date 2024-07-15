@@ -11,7 +11,7 @@ require (
 	github.com/knadh/koanf/v2 v2.1.1
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/mattn/go-isatty v0.0.20
-	github.com/nikoksr/notify v0.41.0
+	github.com/nikoksr/notify v0.41.1
 	github.com/pressly/goose/v3 v3.21.1
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/automaxprocs v1.5.3
@@ -68,7 +68,7 @@ require (
 	golang.org/x/time v0.5.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/gc/v3 v3.0.0-20240304020402-f0dba7c97c2b // indirect
-	modernc.org/libc v1.55.1 // indirect
+	modernc.org/libc v1.55.2 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.8.0 // indirect
 	modernc.org/strutil v1.2.0 // indirect
