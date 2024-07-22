@@ -11,11 +11,11 @@ require (
 	github.com/knadh/koanf/v2 v2.1.1
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/mattn/go-isatty v0.0.20
-	github.com/nikoksr/notify v0.41.1
+	github.com/nikoksr/notify v1.0.0
 	github.com/pressly/goose/v3 v3.21.1
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/automaxprocs v1.5.3
-	modernc.org/sqlite v1.30.2
+	modernc.org/sqlite v1.31.0
 )
 
 require (
@@ -47,7 +47,6 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
