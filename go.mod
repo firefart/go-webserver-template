@@ -6,7 +6,7 @@ require (
 	github.com/a-h/templ v0.2.747
 	github.com/charmbracelet/log v0.4.0
 	github.com/knadh/koanf/parsers/json v0.1.0
-	github.com/knadh/koanf/providers/file v1.0.0
+	github.com/knadh/koanf/providers/file v1.1.0
 	github.com/knadh/koanf/providers/structs v0.1.0
 	github.com/knadh/koanf/v2 v2.1.1
 	github.com/labstack/echo/v4 v4.12.0
