@@ -19,7 +19,7 @@ require (
 )
 
 require (
-	github.com/atc0005/go-teams-notify/v2 v2.10.0 // indirect
+	github.com/atc0005/go-teams-notify/v2 v2.11.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/bwmarrin/discordgo v0.28.1 // indirect
 	github.com/charmbracelet/lipgloss v0.12.1 // indirect
@@ -67,7 +67,7 @@ require (
 	golang.org/x/time v0.5.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/gc/v3 v3.0.0-20240801135723-a856999a2e4a // indirect
-	modernc.org/libc v1.55.7 // indirect
+	modernc.org/libc v1.55.8 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.8.0 // indirect
 	modernc.org/strutil v1.2.0 // indirect
