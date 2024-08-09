@@ -26,7 +26,16 @@ func TestMigrations(t *testing.T) {
 	ctx := context.Background()
 
 	result, err := prov.Up(ctx)
-	require.Nil(t, err, "could not apply migrations")
+	if err != nil {
+		var partialError *goose.PartialError
+		switch {
+		case errors.As(err, &partialError):
+			require.Nil(t, partialError.Err, "could not apply migrations")
+		default:
+			require.Nil(t, err, "could not apply migrations")
+		}
+		return
+	}
 
 	for _, r := range result {
 		if r.Error != nil {
