@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/pressly/goose/v3"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	_ "modernc.org/sqlite"
@@ -62,4 +63,36 @@ func TestMigrations(t *testing.T) {
 			require.Nilf(t, r.Error, "could not roll back migration %s", r.Source.Path)
 		}
 	}
+
+	// check for leftover indexes
+	rows, err := db.Query("SELECT name FROM sqlite_master WHERE type = 'index'")
+	require.Nil(t, err)
+	defer rows.Close()
+
+	var index_names []string
+	for rows.Next() {
+		var name string
+		err = rows.Scan(&name)
+		require.Nil(t, err)
+		index_names = append(index_names, name)
+	}
+	require.Nil(t, rows.Err())
+
+	assert.Len(t, index_names, 0, "found undeleted indexes")
+
+	// check for leftover tables
+	rows, err = db.Query("SELECT name FROM sqlite_master WHERE type = 'table' and name != 'goose_db_version' and name != 'sqlite_sequence'")
+	require.Nil(t, err)
+	defer rows.Close()
+
+	var table_names []string
+	for rows.Next() {
+		var name string
+		err = rows.Scan(&name)
+		require.Nil(t, err)
+		table_names = append(table_names, name)
+	}
+	require.Nil(t, rows.Err())
+
+	assert.Len(t, table_names, 0, "found undeleted tables")
 }
