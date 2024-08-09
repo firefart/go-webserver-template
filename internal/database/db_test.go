@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"io/fs"
 	"testing"
 
@@ -36,7 +37,17 @@ func TestMigrations(t *testing.T) {
 	require.Positive(t, len(result))
 
 	result, err = prov.DownTo(ctx, 0)
-	require.Nil(t, err, "could not roll back migrations")
+	if err != nil {
+		var partialError *goose.PartialError
+		switch {
+		case errors.As(err, &partialError):
+			require.Nil(t, partialError.Err, "could not roll back migrations")
+		default:
+			require.Nil(t, err, "could not roll back migrations")
+		}
+		return
+	}
+
 	for _, r := range result {
 		if r.Error != nil {
 			require.Nilf(t, r.Error, "could not roll back migration %s", r.Source.Path)
