@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 
 	"github.com/firefart/go-webserver-template/internal/config"
@@ -157,23 +156,17 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debug 
 		}
 	}()
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		// wait for a signal
-		<-ctx.Done()
-		app.logger.Info("received shutdown signal")
-		// create a new context for shutdown
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), configuration.Server.GracefulTimeout)
-		defer cancel()
-		if err := srv.Shutdown(shutdownCtx); err != nil {
-			app.logger.Error("error on srv shutdown", slog.String("err", err.Error()))
-		}
-		if err := pprofSrv.Shutdown(shutdownCtx); err != nil {
-			app.logger.Error("error on pprofsrv shutdown", slog.String("err", err.Error()))
-		}
-	}()
-	wg.Wait()
+	// wait for a signal
+	<-ctx.Done()
+	app.logger.Info("received shutdown signal")
+	// create a new context for shutdown
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), configuration.Server.GracefulTimeout)
+	defer cancel()
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		app.logger.Error("error on srv shutdown", slog.String("err", err.Error()))
+	}
+	if err := pprofSrv.Shutdown(shutdownCtx); err != nil {
+		app.logger.Error("error on pprofsrv shutdown", slog.String("err", err.Error()))
+	}
 	return nil
 }
