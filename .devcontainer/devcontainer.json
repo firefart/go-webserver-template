@@ -28,7 +28,8 @@
         "usernamehw.errorlens",
         "bradlc.vscode-tailwindcss",
         "otovo-oss.htmx-tags",
-        "a-h.templ"
+        "a-h.templ",
+        "rangav.vscode-thunder-client"
       ]
     }
   }
