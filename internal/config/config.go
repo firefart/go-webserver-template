@@ -11,58 +11,58 @@ import (
 )
 
 type Configuration struct {
-	Server        ConfigServer       `koanf:"server"`
-	Cache         ConfigCache        `koanf:"cache"`
-	Database      ConfigDatabase     `koanf:"database"`
-	Notifications ConfigNotification `koanf:"notifications"`
-	Timeout       time.Duration      `koanf:"timeout"`
-	Cloudflare    bool               `koanf:"cloudflare"`
+	Server        Server        `koanf:"server"`
+	Cache         Cache         `koanf:"cache"`
+	Database      Database      `koanf:"database"`
+	Notifications Notification  `koanf:"notifications"`
+	Timeout       time.Duration `koanf:"timeout"`
+	Cloudflare    bool          `koanf:"cloudflare"`
 }
 
-type ConfigServer struct {
+type Server struct {
 	Listen          string        `koanf:"listen"`
 	PprofListen     string        `koanf:"listen_pprof"`
 	GracefulTimeout time.Duration `koanf:"graceful_timeout"`
-	TLS             ConfigTLS     `koanf:"tls"`
+	TLS             TLS           `koanf:"tls"`
 }
 
-type ConfigTLS struct {
+type TLS struct {
 	PublicKey       string `koanf:"public_key"`
 	PrivateKey      string `koanf:"private_key"`
 	MTLSRootCA      string `koanf:"mtls_root_ca"`
 	MTLSCertSubject string `koanf:"mtls_cert_subject"`
 }
 
-type ConfigCache struct {
+type Cache struct {
 	Enabled bool          `koanf:"enabled"`
 	Timeout time.Duration `koanf:"timeout"`
 }
 
-type ConfigDatabase struct {
+type Database struct {
 	Filename string `koanf:"filename"`
 }
 
-type ConfigNotification struct {
-	SecretKeyHeaderName  string                     `koanf:"secret_key_header_name"`
-	SecretKeyHeaderValue string                     `koanf:"secret_key_header_value"`
-	Telegram             ConfigNotificationTelegram `koanf:"telegram"`
-	Discord              ConfigNotificationDiscord  `koanf:"discord"`
-	Email                ConfigNotificationEmail    `koanf:"email"`
-	SendGrid             ConfigNotificationSendGrid `koanf:"sendgrid"`
-	MSTeams              ConfigNotificationMSTeams  `koanf:"msteams"`
+type Notification struct {
+	SecretKeyHeaderName  string               `koanf:"secret_key_header_name"`
+	SecretKeyHeaderValue string               `koanf:"secret_key_header_value"`
+	Telegram             NotificationTelegram `koanf:"telegram"`
+	Discord              NotificationDiscord  `koanf:"discord"`
+	Email                NotificationEmail    `koanf:"email"`
+	SendGrid             NotificationSendGrid `koanf:"sendgrid"`
+	MSTeams              NotificationMSTeams  `koanf:"msteams"`
 }
 
-type ConfigNotificationTelegram struct {
+type NotificationTelegram struct {
 	APIToken string  `koanf:"api_token"`
 	ChatIDs  []int64 `koanf:"chat_ids"`
 }
-type ConfigNotificationDiscord struct {
+type NotificationDiscord struct {
 	BotToken   string   `koanf:"bot_token"`
 	OAuthToken string   `koanf:"oauth_token"`
 	ChannelIDs []string `koanf:"channel_ids"`
 }
 
-type ConfigNotificationEmail struct {
+type NotificationEmail struct {
 	Sender     string   `koanf:"sender"`
 	Server     string   `koanf:"server"`
 	Port       int      `koanf:"port"`
@@ -71,31 +71,31 @@ type ConfigNotificationEmail struct {
 	Recipients []string `koanf:"recipients"`
 }
 
-type ConfigNotificationSendGrid struct {
+type NotificationSendGrid struct {
 	APIKey        string   `koanf:"api_key"`
 	SenderAddress string   `koanf:"sender_address"`
 	SenderName    string   `koanf:"sender_name"`
 	Recipients    []string `koanf:"recipients"`
 }
 
-type ConfigNotificationMSTeams struct {
+type NotificationMSTeams struct {
 	Webhooks []string `koanf:"webhooks"`
 }
 
 var defaultConfig = Configuration{
-	Server: ConfigServer{
+	Server: Server{
 		Listen:          "127.0.0.1:8000",
 		PprofListen:     "127.0.0.1:1234",
 		GracefulTimeout: 10 * time.Second,
 	},
-	Cache: ConfigCache{
+	Cache: Cache{
 		Enabled: true,
 		Timeout: 1 * time.Hour,
 	},
-	Notifications: ConfigNotification{
+	Notifications: Notification{
 		SecretKeyHeaderName: "X-Secret-Key-Header",
 	},
-	Database: ConfigDatabase{
+	Database: Database{
 		Filename: "db.sqlite3",
 	},
 	Timeout:    5 * time.Second,

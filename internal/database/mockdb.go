@@ -8,6 +8,6 @@ func NewMockDB() *MockDB {
 }
 
 // compile time check that struct implements the interface
-var _ DatabaseInterface = (*MockDB)(nil)
+var _ Interface = (*MockDB)(nil)
 
 func (db *MockDB) Close() error { return nil }

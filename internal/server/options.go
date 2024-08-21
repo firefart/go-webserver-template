@@ -22,7 +22,7 @@ func WithNotify(n *notify.Notify) OptionsServerFunc {
 	return func(c *server) { c.notify = n }
 }
 
-func WithDB(db database.DatabaseInterface) OptionsServerFunc {
+func WithDB(db database.Interface) OptionsServerFunc {
 	return func(c *server) { c.db = db }
 }
 

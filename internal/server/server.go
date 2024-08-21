@@ -17,7 +17,7 @@ import (
 type server struct {
 	logger *slog.Logger
 	config config.Configuration
-	db     database.DatabaseInterface
+	db     database.Interface
 	notify *notify.Notify
 	debug  bool
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/firefart/go-webserver-template/internal/config"
 	"github.com/pressly/goose/v3"
 
+	// import the sqlite driver as we use it as a database
 	_ "modernc.org/sqlite"
 )
 
@@ -21,7 +22,7 @@ var embedMigrations embed.FS
 
 var ErrNotFound = errors.New("record not found in database")
 
-type DatabaseInterface interface {
+type Interface interface {
 	Close() error
 }
 
@@ -31,7 +32,7 @@ type Database struct {
 }
 
 // compile time check that struct implements the interface
-var _ DatabaseInterface = (*Database)(nil)
+var _ Interface = (*Database)(nil)
 
 func New(ctx context.Context, configuration config.Configuration, logger *slog.Logger) (*Database, error) {
 	if strings.ToLower(configuration.Database.Filename) == ":memory:" {

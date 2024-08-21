@@ -39,13 +39,13 @@ func (s *server) customHTTPErrorHandler(err error, c echo.Context) {
 
 	// send error page
 	errorPage := fmt.Sprintf("assets/error_pages/HTTP%d.html", code)
-	if _, err := fs.Stat(fsAssets, errorPage); err == nil {
-		// file exists, no further processing
-	} else if errors.Is(err, os.ErrNotExist) {
-		errorPage = "assets/error_pages/HTTP500.html"
-	} else {
-		s.logger.Error("could not check if file exists", slog.String("err", err.Error()))
-		errorPage = "assets/error_pages/HTTP500.html"
+	if _, err := fs.Stat(fsAssets, errorPage); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			errorPage = "assets/error_pages/HTTP500.html"
+		} else {
+			s.logger.Error("could not check if file exists", slog.String("err", err.Error()))
+			errorPage = "assets/error_pages/HTTP500.html"
+		}
 	}
 
 	content, err2 := fsAssets.ReadFile(errorPage)

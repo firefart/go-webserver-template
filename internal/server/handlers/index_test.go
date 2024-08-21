@@ -42,7 +42,7 @@ func TestIndex(t *testing.T) {
 	defer os.Remove(file.Name())
 
 	configuration := config.Configuration{
-		Database: config.ConfigDatabase{
+		Database: config.Database{
 			Filename: file.Name(),
 		},
 	}

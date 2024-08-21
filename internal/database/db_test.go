@@ -69,30 +69,30 @@ func TestMigrations(t *testing.T) {
 	require.Nil(t, err)
 	defer rows.Close()
 
-	var index_names []string
+	var indexNames []string
 	for rows.Next() {
 		var name string
 		err = rows.Scan(&name)
 		require.Nil(t, err)
-		index_names = append(index_names, name)
+		indexNames = append(indexNames, name)
 	}
 	require.Nil(t, rows.Err())
 
-	assert.Len(t, index_names, 0, "found undeleted indexes")
+	assert.Len(t, indexNames, 0, "found undeleted indexes")
 
 	// check for leftover tables
 	rows, err = db.Query("SELECT name FROM sqlite_master WHERE type = 'table' and name != 'goose_db_version' and name != 'sqlite_sequence'")
 	require.Nil(t, err)
 	defer rows.Close()
 
-	var table_names []string
+	var tableNames []string
 	for rows.Next() {
 		var name string
 		err = rows.Scan(&name)
 		require.Nil(t, err)
-		table_names = append(table_names, name)
+		tableNames = append(tableNames, name)
 	}
 	require.Nil(t, rows.Err())
 
-	assert.Len(t, table_names, 0, "found undeleted tables")
+	assert.Len(t, tableNames, 0, "found undeleted tables")
 }
