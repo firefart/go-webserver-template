@@ -1,6 +1,6 @@
 module github.com/firefart/go-webserver-template
 
-go 1.22
+go 1.23
 
 require (
 	github.com/a-h/templ v0.2.771
