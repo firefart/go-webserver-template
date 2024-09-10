@@ -1,5 +1,5 @@
 LICENSE
-Makefile
+Taskfile.yml
 *.md
 .gitignore
 .github

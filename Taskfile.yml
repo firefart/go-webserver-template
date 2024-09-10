@@ -72,3 +72,11 @@ tasks:
     vars:
       GOPATH:
         sh: go env GOPATH
+
+  tag:
+    cmds:
+      - git tag -a "${TAG}" -m "${TAG}"
+      - git push origin "${TAG}"
+    preconditions:
+      - sh: '[[ -n "${TAG}" ]]'
+        msg: "Please set the TAG environment variable"
