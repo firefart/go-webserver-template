@@ -15,7 +15,7 @@ require (
 	github.com/pressly/goose/v3 v3.22.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/automaxprocs v1.5.3
-	modernc.org/sqlite v1.33.0
+	modernc.org/sqlite v1.33.1
 )
 
 require (
@@ -67,6 +67,7 @@ require (
 	golang.org/x/time v0.6.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/gc/v3 v3.0.0-20240801135723-a856999a2e4a // indirect
+	modernc.org/libc v1.60.1 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.8.0 // indirect
 	modernc.org/strutil v1.2.0 // indirect
