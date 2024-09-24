@@ -14,7 +14,7 @@ require (
 	github.com/nikoksr/notify v1.0.0
 	github.com/pressly/goose/v3 v3.22.1
 	github.com/stretchr/testify v1.9.0
-	go.uber.org/automaxprocs v1.5.3
+	go.uber.org/automaxprocs v1.6.0
 	modernc.org/sqlite v1.33.1
 )
 
