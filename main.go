@@ -84,7 +84,7 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debug 
 		return err
 	}
 	defer func() {
-		if err := db.Close(); err != nil {
+		if err := db.Close(configuration.Server.GracefulTimeout); err != nil {
 			app.logger.Error("error on database close", slog.String("err", err.Error()))
 		}
 	}()

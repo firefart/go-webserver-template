@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"time"
 )
 
 type MockDB struct{}
@@ -14,7 +15,7 @@ func NewMockDB() *MockDB {
 // compile time check that struct implements the interface
 var _ Interface = (*MockDB)(nil)
 
-func (*MockDB) Close() error { return nil }
+func (*MockDB) Close(_ time.Duration) error { return nil }
 
 func (*MockDB) GetAllDummy(_ context.Context) ([]int64, error) {
 	return nil, nil

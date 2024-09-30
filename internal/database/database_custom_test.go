@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/firefart/go-webserver-template/internal/config"
 	"github.com/firefart/go-webserver-template/internal/database"
@@ -30,7 +31,7 @@ func TestGetAllDummy(t *testing.T) {
 	ctx := context.Background()
 	db, err := database.New(ctx, configuration, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	require.Nil(t, err)
-	defer db.Close()
+	defer db.Close(1 * time.Second)
 
 	id, err := db.InsertDummy(ctx, "Test")
 	require.Nil(t, err)

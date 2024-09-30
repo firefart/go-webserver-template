@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/firefart/go-webserver-template/internal/config"
 	"github.com/pressly/goose/v3"
@@ -35,7 +36,7 @@ func TestNew(t *testing.T) {
 	}
 	db, err := New(context.Background(), configuration, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	require.Nil(t, err)
-	err = db.Close()
+	err = db.Close(1 * time.Second)
 	require.Nil(t, err)
 }
 

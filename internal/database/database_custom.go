@@ -2,10 +2,11 @@ package database
 
 import (
 	"context"
+	"time"
 )
 
 type Interface interface {
-	Close() error
+	Close(timeout time.Duration) error
 	InsertDummy(ctx context.Context, name string) (int64, error)
 	GetAllDummy(ctx context.Context) ([]int64, error)
 }
