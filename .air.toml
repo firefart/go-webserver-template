@@ -5,17 +5,16 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = ""
-  cmd = "templ generate && go build -o ./tmp/main ."
+  cmd = "task generate && go build -o ./tmp/main ."
   delay = 1000
-  exclude_dir = ["tmp", "vendor", "testdata", "node_modules"]
+  exclude_dir = ["tmp", "vendor", "testdata", "node_modules", "internal/database/sqlc"]
   exclude_file = []
   exclude_regex = ["_test.go", "_templ.go"]
   exclude_unchanged = false
   follow_symlink = false
-  # see https://github.com/charmbracelet/log/issues/90
-  full_bin = "CI=1 CLICOLOR_FORCE=1 ./tmp/main -config config.json -debug"
+  full_bin = "CI=1 CLICOLOR_FORCE=1 ./tmp/main -config config.json -debug -dry-run"
   include_dir = []
-  include_ext = ["go", "tpl", "tmpl", "templ", "html"]
+  include_ext = ["go", "tpl", "tmpl", "templ", "html", "sql"]
   include_file = []
   kill_delay = "0s"
   log = "build-errors.log"

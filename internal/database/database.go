@@ -11,28 +11,22 @@ import (
 	"strings"
 
 	"github.com/firefart/go-webserver-template/internal/config"
+	"github.com/firefart/go-webserver-template/internal/database/sqlc"
 	"github.com/pressly/goose/v3"
 
-	// import the sqlite driver as we use it as a database
+	// use the sqlite implementation
 	_ "modernc.org/sqlite"
 )
 
 //go:embed migrations/*.sql
 var embedMigrations embed.FS
 
-var ErrNotFound = errors.New("record not found in database")
-
-type Interface interface {
-	Close() error
-}
-
 type Database struct {
-	reader *sql.DB
-	writer *sql.DB
+	reader    *sqlc.Queries
+	writer    *sqlc.Queries
+	readerRAW *sql.DB
+	writerRAW *sql.DB
 }
-
-// compile time check that struct implements the interface
-var _ Interface = (*Database)(nil)
 
 func New(ctx context.Context, configuration config.Configuration, logger *slog.Logger) (*Database, error) {
 	if strings.ToLower(configuration.Database.Filename) == ":memory:" {
@@ -56,8 +50,10 @@ func New(ctx context.Context, configuration config.Configuration, logger *slog.L
 	writer.SetMaxIdleConns(1)
 
 	return &Database{
-		reader: reader,
-		writer: writer,
+		reader:    sqlc.New(reader),
+		writer:    sqlc.New(writer),
+		readerRAW: reader,
+		writerRAW: writer,
 	}, nil
 }
 
@@ -91,14 +87,14 @@ func newDatabase(ctx context.Context, configuration config.Configuration, logger
 		}
 
 		if len(result) > 0 {
-			logger.Info(fmt.Sprintf("Applied %d database migrations", len(result)))
+			logger.Info(fmt.Sprintf("applied %d database migrations", len(result)))
 		}
 
 		version, err := prov.GetDBVersion(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("could not get current database version: %w", err)
 		}
-		logger.Info("Database setup", slog.Int64("version", version))
+		logger.Info("database setup completed", slog.Int64("version", version))
 	}
 
 	// shrink and defrag the database (must be run before the checkpoint)
@@ -125,7 +121,7 @@ func newDatabase(ctx context.Context, configuration config.Configuration, logger
 }
 
 func (db *Database) Close() error {
-	err1 := db.writer.Close()
-	err2 := db.reader.Close()
+	err1 := db.writerRAW.Close()
+	err2 := db.readerRAW.Close()
 	return errors.Join(err1, err2)
 }

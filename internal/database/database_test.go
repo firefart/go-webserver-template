@@ -4,9 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"io"
 	"io/fs"
+	"log"
+	"log/slog"
+	"os"
 	"testing"
 
+	"github.com/firefart/go-webserver-template/internal/config"
 	"github.com/pressly/goose/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -14,7 +19,29 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+func TestNew(t *testing.T) {
+	t.Parallel()
+
+	file, err := os.CreateTemp("", "*.sqlite")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(file.Name())
+
+	configuration := config.Configuration{
+		Database: config.Database{
+			Filename: file.Name(),
+		},
+	}
+	db, err := New(context.Background(), configuration, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	require.Nil(t, err)
+	err = db.Close()
+	require.Nil(t, err)
+}
+
 func TestMigrations(t *testing.T) {
+	t.Parallel()
+
 	db, err := sql.Open("sqlite", ":memory:?_pragma=journal_mode(WAL)&_pragma=foreign_keys(1)")
 	require.Nil(t, err, "could not open database")
 
