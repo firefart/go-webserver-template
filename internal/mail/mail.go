@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"strings"
 
 	"github.com/firefart/go-webserver-template/internal/config"
 
@@ -30,15 +29,15 @@ var _ Interface = (*Mail)(nil)
 
 type NullMailer struct{}
 
-func (NullMailer) SendHTMLEmail(ctx context.Context, subject, body string) error {
+func (NullMailer) SendHTMLEmail(_ context.Context, _, _ string) error {
 	return nil
 }
 
-func (NullMailer) SendTXTEmail(ctx context.Context, subject, body string) error {
+func (NullMailer) SendTXTEmail(_ context.Context, _, _ string) error {
 	return nil
 }
 
-func (NullMailer) SendMultipartEmail(ctx context.Context, subject, textBody, htmlBody string) error {
+func (NullMailer) SendMultipartEmail(_ context.Context, _, _, _ string) error {
 	return nil
 }
 
@@ -147,18 +146,4 @@ func (m *Mail) send(ctx context.Context, to string, subject, textContent, htmlCo
 		m.logger.Error("error on sending email", slog.String("subject", subject), slog.Int("try", i), slog.String("err", err.Error()))
 	}
 	return fmt.Errorf("could not send mail %q after %d retries. Last error: %w", subject, m.config.Mail.Retries, err)
-}
-
-func formatHeaders(header map[string][]string) string {
-	var sb strings.Builder
-	for key, value := range header {
-		sb.WriteString(fmt.Sprintf("%s: %s\n", key, strings.Join(value, ", ")))
-	}
-	return sb.String()
-}
-
-func generateHTML(body string) string {
-	body = strings.ReplaceAll(body, "\n", "<br>\n")
-	body = fmt.Sprintf("<html><body>%s</body></html>", body)
-	return body
 }
