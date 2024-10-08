@@ -13,6 +13,7 @@ import (
 
 	"github.com/firefart/go-webserver-template/internal/config"
 	"github.com/firefart/go-webserver-template/internal/database"
+	"github.com/firefart/go-webserver-template/internal/mail"
 	"github.com/firefart/go-webserver-template/internal/server"
 
 	"github.com/nikoksr/notify"
@@ -29,6 +30,7 @@ type application struct {
 	cache  *Cache[string]
 	notify *notify.Notify
 	db     *database.Database
+	mailer mail.Interface
 }
 
 func init() {
@@ -91,6 +93,11 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debug 
 	app.db = db
 
 	app.cache = NewCache[string](ctx, logger, "cache", configuration.Cache.Timeout)
+
+	app.mailer, err = mail.New(configuration, logger)
+	if err != nil {
+		return err
+	}
 
 	app.logger.Info("Starting server",
 		slog.String("host", configuration.Server.Listen),

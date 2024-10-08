@@ -13,6 +13,7 @@ import (
 type Configuration struct {
 	Server        Server        `koanf:"server"`
 	Cache         Cache         `koanf:"cache"`
+	Mail          Mail          `koanf:"mail"`
 	Database      Database      `koanf:"database"`
 	Notifications Notification  `koanf:"notifications"`
 	Timeout       time.Duration `koanf:"timeout"`
@@ -36,6 +37,24 @@ type TLS struct {
 type Cache struct {
 	Enabled bool          `koanf:"enabled"`
 	Timeout time.Duration `koanf:"timeout"`
+}
+
+type Mail struct {
+	Enabled bool   `koanf:"enabled"`
+	Server  string `koanf:"server"`
+	Port    int    `koanf:"port"`
+	From    struct {
+		Name string `koanf:"name"`
+		Mail string `koanf:"mail"`
+	} `koanf:"from"`
+	To       []string      `koanf:"to"`
+	User     string        `koanf:"user"`
+	Password string        `koanf:"password"`
+	TLS      bool          `koanf:"tls"`
+	StartTLS bool          `koanf:"starttls"`
+	SkipTLS  bool          `koanf:"skiptls"`
+	Retries  int           `koanf:"retries"`
+	Timeout  time.Duration `koanf:"timeout"`
 }
 
 type Database struct {
