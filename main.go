@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"syscall"
 
 	"github.com/firefart/go-webserver-template/internal/config"
@@ -44,10 +45,22 @@ func main() {
 	var debugMode bool
 	var configFilename string
 	var jsonOutput bool
+	var version bool
 	flag.BoolVar(&debugMode, "debug", false, "Enable DEBUG mode")
 	flag.StringVar(&configFilename, "config", "", "config file to use")
 	flag.BoolVar(&jsonOutput, "json", false, "output in json instead")
+	flag.BoolVar(&version, "version", false, "show version")
 	flag.Parse()
+
+	if version {
+		buildInfo, ok := debug.ReadBuildInfo()
+		if !ok {
+			fmt.Println("Unable to determine version information")
+			os.Exit(1)
+		}
+		fmt.Printf("%s", buildInfo)
+		os.Exit(0)
+	}
 
 	logger := newLogger(debugMode, jsonOutput)
 	ctx := context.Background()
@@ -155,6 +168,12 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debug 
 	}
 	go func() {
 		metricsMux := http.NewServeMux()
+		// pprof is automatically added to the DefaultServeMux
+		// this is not used anywhere so it's safe to use the auto
+		// implementation. The following line makes sure we use
+		// the configuration from defaultservermux
+		// If you ever want to use the default serve mux: don't
+		// otherwise you will expose the debug endpoints
 		metricsMux.Handle("/debug/pprof/", http.DefaultServeMux)
 		if err := pprofSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			app.logger.Error("error on pprof listenandserve", slog.String("err", err.Error()))
