@@ -107,9 +107,11 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 
 	app.cache = NewCache[string](ctx, logger, "cache", configuration.Cache.Timeout)
 
-	app.mailer, err = mail.New(configuration, logger)
-	if err != nil {
-		return err
+	if configuration.Mail.Enabled {
+		app.mailer, err = mail.New(configuration, logger)
+		if err != nil {
+			return err
+		}
 	}
 
 	app.logger.Info("Starting server",

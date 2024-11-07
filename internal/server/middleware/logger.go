@@ -1,24 +1,14 @@
-package server
+package middleware
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func (s *server) middlewareRecover() echo.MiddlewareFunc {
-	return middleware.RecoverWithConfig(middleware.RecoverConfig{
-		LogErrorFunc: func(_ echo.Context, err error, stack []byte) error {
-			// send the error to the default error handler
-			return fmt.Errorf("PANIC! %v - %s", err, string(stack))
-		},
-	})
-}
-
-func (s *server) middlewareRequestLogger(ctx context.Context) echo.MiddlewareFunc {
+func RequestLogger(ctx context.Context, logger *slog.Logger) echo.MiddlewareFunc {
 	return middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogStatus:        true,
 		LogURI:           true,
@@ -38,7 +28,7 @@ func (s *server) middlewareRequestLogger(ctx context.Context) echo.MiddlewareFun
 				errString = v.Error.Error()
 				logLevel = slog.LevelError
 			}
-			s.logger.LogAttrs(ctx, logLevel, "REQUEST",
+			logger.LogAttrs(ctx, logLevel, "REQUEST",
 				slog.String("ip", v.RemoteIP),
 				slog.String("method", v.Method),
 				slog.String("uri", v.URI),

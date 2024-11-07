@@ -11,6 +11,23 @@
   "timeout": "5s",
   "secret_key_header_name": "X-Secret-Key-Header",
   "secret_key_header_value": "SECRET",
+  "mail": {
+    "enabled": true,
+    "server": "server.com",
+    "port": 25,
+    "from": {
+      "name": "From",
+      "email": "email"
+    },
+    "to": "user@domain.com",
+    "user": "username",
+    "password": "password",
+    "tls": false,
+    "starttls": true,
+    "skiptls": false,
+    "retries": 5,
+    "timeout": "5s"
+  },
   "notifications": {
     "telegram": {
       "api_token": "",
