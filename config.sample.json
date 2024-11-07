@@ -9,9 +9,9 @@
   },
   "cloudflare": false,
   "timeout": "5s",
+  "secret_key_header_name": "X-Secret-Key-Header",
+  "secret_key_header_value": "SECRET",
   "notifications": {
-    "secret_key_header_name": "X-Secret-Key-Header",
-    "secret_key_header_value": "SECRET",
     "telegram": {
       "api_token": "",
       "chat_ids": [

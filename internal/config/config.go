@@ -11,13 +11,15 @@ import (
 )
 
 type Configuration struct {
-	Server        Server        `koanf:"server"`
-	Cache         Cache         `koanf:"cache"`
-	Mail          Mail          `koanf:"mail"`
-	Database      Database      `koanf:"database"`
-	Notifications Notification  `koanf:"notifications"`
-	Timeout       time.Duration `koanf:"timeout"`
-	Cloudflare    bool          `koanf:"cloudflare"`
+	Server               Server        `koanf:"server"`
+	Cache                Cache         `koanf:"cache"`
+	Mail                 Mail          `koanf:"mail"`
+	Database             Database      `koanf:"database"`
+	Notifications        Notification  `koanf:"notifications"`
+	Timeout              time.Duration `koanf:"timeout"`
+	Cloudflare           bool          `koanf:"cloudflare"`
+	SecretKeyHeaderName  string        `koanf:"secret_key_header_name"`
+	SecretKeyHeaderValue string        `koanf:"secret_key_header_value"`
 }
 
 type Server struct {
@@ -62,13 +64,11 @@ type Database struct {
 }
 
 type Notification struct {
-	SecretKeyHeaderName  string               `koanf:"secret_key_header_name"`
-	SecretKeyHeaderValue string               `koanf:"secret_key_header_value"`
-	Telegram             NotificationTelegram `koanf:"telegram"`
-	Discord              NotificationDiscord  `koanf:"discord"`
-	Email                NotificationEmail    `koanf:"email"`
-	SendGrid             NotificationSendGrid `koanf:"sendgrid"`
-	MSTeams              NotificationMSTeams  `koanf:"msteams"`
+	Telegram NotificationTelegram `koanf:"telegram"`
+	Discord  NotificationDiscord  `koanf:"discord"`
+	Email    NotificationEmail    `koanf:"email"`
+	SendGrid NotificationSendGrid `koanf:"sendgrid"`
+	MSTeams  NotificationMSTeams  `koanf:"msteams"`
 }
 
 type NotificationTelegram struct {
@@ -111,14 +111,12 @@ var defaultConfig = Configuration{
 		Enabled: true,
 		Timeout: 1 * time.Hour,
 	},
-	Notifications: Notification{
-		SecretKeyHeaderName: "X-Secret-Key-Header",
-	},
 	Database: Database{
 		Filename: "db.sqlite3",
 	},
-	Timeout:    5 * time.Second,
-	Cloudflare: false,
+	Timeout:             5 * time.Second,
+	Cloudflare:          false,
+	SecretKeyHeaderName: "X-Secret-Key-Header",
 }
 
 func GetConfig(f string) (Configuration, error) {
@@ -139,11 +137,11 @@ func GetConfig(f string) (Configuration, error) {
 		return Configuration{}, err
 	}
 
-	if config.Notifications.SecretKeyHeaderName == "" {
+	if config.SecretKeyHeaderName == "" {
 		return Configuration{}, fmt.Errorf("please supply a secret key header name in the config")
 	}
 
-	if config.Notifications.SecretKeyHeaderValue == "" {
+	if config.SecretKeyHeaderValue == "" {
 		return Configuration{}, fmt.Errorf("please supply a secret key header value in the config")
 	}
 

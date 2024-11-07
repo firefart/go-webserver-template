@@ -8,7 +8,7 @@ import (
 )
 
 func (s *server) addRoutes(e *echo.Echo) {
-	secretKeyHeaderName := http.CanonicalHeaderKey(s.config.Notifications.SecretKeyHeaderName)
+	secretKeyHeaderName := http.CanonicalHeaderKey(s.config.SecretKeyHeaderName)
 
 	static := echo.MustSubFS(fsAssets, "assets/web")
 	e.FileFS("/robots.txt", "robots.txt", static)
@@ -17,6 +17,7 @@ func (s *server) addRoutes(e *echo.Echo) {
 
 	e.GET("/", handlers.NewIndexHandler(s.debug).EchoHandler)
 
-	e.GET("/test/panic", handlers.NewPanicHandler(s.logger, s.debug, secretKeyHeaderName, s.config.Notifications.SecretKeyHeaderValue).EchoHandler)
-	e.GET("/test/notifications", handlers.NewNotificationHandler(s.logger, s.debug, secretKeyHeaderName, s.config.Notifications.SecretKeyHeaderValue).EchoHandler)
+	e.GET("/test/panic", handlers.NewPanicHandler(s.logger, s.debug, secretKeyHeaderName, s.config.SecretKeyHeaderValue).EchoHandler)
+	e.GET("/test/notifications", handlers.NewNotificationHandler(s.logger, s.debug, secretKeyHeaderName, s.config.SecretKeyHeaderValue).EchoHandler)
+	e.GET("/version", handlers.NewVersionHandler(s.logger, s.debug, secretKeyHeaderName, s.config.SecretKeyHeaderValue).EchoHandler)
 }

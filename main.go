@@ -70,13 +70,13 @@ func main() {
 	}
 }
 
-func run(ctx context.Context, logger *slog.Logger, configFilename string, debug bool) error {
+func run(ctx context.Context, logger *slog.Logger, configFilename string, debugMode bool) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	defer cancel()
 
 	app := &application{
 		logger: logger,
-		debug:  debug,
+		debug:  debugMode,
 	}
 
 	if configFilename == "" {
