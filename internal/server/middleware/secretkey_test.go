@@ -51,7 +51,7 @@ func TestSecretKeyHeader(t *testing.T) {
 
 	// debug should skip checks
 	mw = SecretKeyHeader(SecretKeyHeaderConfig{
-		Skipper: func(c echo.Context) bool {
+		Skipper: func(_ echo.Context) bool {
 			return true // simulate debug set to true
 		},
 		SecretKeyHeaderName:  "X-Secret-Key",
