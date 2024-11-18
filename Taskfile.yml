@@ -35,6 +35,7 @@ tasks:
       - npm i -D tailwindcss@latest
       - npm i -D @tailwindcss/typography
       - npm i -D daisyui@latest
+      - npm audit fix
 
   build:
     aliases: [default]
