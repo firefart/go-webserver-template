@@ -40,7 +40,7 @@ func NewServer(ctx context.Context, opts ...OptionsServerFunc) http.Handler {
 	e.HideBanner = true
 	e.HTTPErrorHandler = s.customHTTPErrorHandler
 
-	if s.config.Cloudflare {
+	if s.config.Server.Cloudflare {
 		e.IPExtractor = extractIPFromCloudflareHeader()
 	}
 

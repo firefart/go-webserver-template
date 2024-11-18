@@ -12,8 +12,8 @@ func (s *server) addRoutes(e *echo.Echo) {
 		Skipper: func(_ echo.Context) bool {
 			return s.debug
 		},
-		SecretKeyHeaderName:  s.config.SecretKeyHeaderName,
-		SecretKeyHeaderValue: s.config.SecretKeyHeaderValue,
+		SecretKeyHeaderName:  s.config.Server.SecretKeyHeaderName,
+		SecretKeyHeaderValue: s.config.Server.SecretKeyHeaderValue,
 		Logger:               s.logger,
 	})
 

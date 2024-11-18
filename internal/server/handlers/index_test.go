@@ -21,8 +21,10 @@ func TestIndexMock(t *testing.T) {
 	ctx := context.Background()
 	db := database.NewMockDB()
 	configuration := config.Configuration{
-		SecretKeyHeaderName:  "X-Secret-Key",
-		SecretKeyHeaderValue: "SECRET",
+		Server: config.Server{
+			SecretKeyHeaderName:  "X-Secret-Key",
+			SecretKeyHeaderValue: "SECRET",
+		},
 	}
 	e := server.NewServer(ctx, server.WithDB(db), server.WithConfig(configuration))
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -49,8 +51,10 @@ func TestIndex(t *testing.T) {
 		Database: config.Database{
 			Filename: file.Name(),
 		},
-		SecretKeyHeaderName:  "X-Secret-Key",
-		SecretKeyHeaderValue: "SECRET",
+		Server: config.Server{
+			SecretKeyHeaderName:  "X-Secret-Key",
+			SecretKeyHeaderValue: "SECRET",
+		},
 	}
 
 	db, err := database.New(ctx, configuration, logger)

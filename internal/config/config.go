@@ -11,22 +11,22 @@ import (
 )
 
 type Configuration struct {
-	Server               Server        `koanf:"server"`
-	Cache                Cache         `koanf:"cache"`
-	Mail                 Mail          `koanf:"mail"`
-	Database             Database      `koanf:"database"`
-	Notifications        Notification  `koanf:"notifications"`
-	Timeout              time.Duration `koanf:"timeout"`
-	Cloudflare           bool          `koanf:"cloudflare"`
-	SecretKeyHeaderName  string        `koanf:"secret_key_header_name"`
-	SecretKeyHeaderValue string        `koanf:"secret_key_header_value"`
+	Server        Server        `koanf:"server"`
+	Cache         Cache         `koanf:"cache"`
+	Mail          Mail          `koanf:"mail"`
+	Database      Database      `koanf:"database"`
+	Notifications Notification  `koanf:"notifications"`
+	Timeout       time.Duration `koanf:"timeout"`
 }
 
 type Server struct {
-	Listen          string        `koanf:"listen"`
-	PprofListen     string        `koanf:"listen_pprof"`
-	GracefulTimeout time.Duration `koanf:"graceful_timeout"`
-	TLS             TLS           `koanf:"tls"`
+	Listen               string        `koanf:"listen"`
+	PprofListen          string        `koanf:"listen_pprof"`
+	GracefulTimeout      time.Duration `koanf:"graceful_timeout"`
+	TLS                  TLS           `koanf:"tls"`
+	Cloudflare           bool          `koanf:"cloudflare"`
+	SecretKeyHeaderName  string        `koanf:"secret_key_header_name"`
+	SecretKeyHeaderValue string        `koanf:"secret_key_header_value"`
 }
 
 type TLS struct {
@@ -103,9 +103,11 @@ type NotificationMSTeams struct {
 
 var defaultConfig = Configuration{
 	Server: Server{
-		Listen:          "127.0.0.1:8000",
-		PprofListen:     "127.0.0.1:1234",
-		GracefulTimeout: 10 * time.Second,
+		Listen:              "127.0.0.1:8000",
+		PprofListen:         "127.0.0.1:1234",
+		GracefulTimeout:     10 * time.Second,
+		Cloudflare:          false,
+		SecretKeyHeaderName: "X-Secret-Key-Header",
 	},
 	Cache: Cache{
 		Enabled: true,
@@ -114,9 +116,7 @@ var defaultConfig = Configuration{
 	Database: Database{
 		Filename: "db.sqlite3",
 	},
-	Timeout:             5 * time.Second,
-	Cloudflare:          false,
-	SecretKeyHeaderName: "X-Secret-Key-Header",
+	Timeout: 5 * time.Second,
 }
 
 func GetConfig(f string) (Configuration, error) {
@@ -137,11 +137,11 @@ func GetConfig(f string) (Configuration, error) {
 		return Configuration{}, err
 	}
 
-	if config.SecretKeyHeaderName == "" {
+	if config.Server.SecretKeyHeaderName == "" {
 		return Configuration{}, fmt.Errorf("please supply a secret key header name in the config")
 	}
 
-	if config.SecretKeyHeaderValue == "" {
+	if config.Server.SecretKeyHeaderValue == "" {
 		return Configuration{}, fmt.Errorf("please supply a secret key header value in the config")
 	}
 

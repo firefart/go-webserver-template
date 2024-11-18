@@ -16,8 +16,10 @@ import (
 func TestVersion(t *testing.T) {
 	ctx := context.Background()
 	configuration := config.Configuration{
-		SecretKeyHeaderName:  "X-Secret-Key",
-		SecretKeyHeaderValue: "SECRET",
+		Server: config.Server{
+			SecretKeyHeaderName:  "X-Secret-Key",
+			SecretKeyHeaderValue: "SECRET",
+		},
 	}
 
 	e := server.NewServer(ctx, server.WithConfig(configuration))
