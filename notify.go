@@ -20,67 +20,77 @@ func setupNotifications(configuration config.Configuration, logger *slog.Logger)
 	not := notify.New()
 	var services []notify.Notifier
 
-	if configuration.Notifications.Telegram.APIToken != "" {
-		logger.Info("Notifications: using telegram")
-		telegramService, err := telegram.New(configuration.Notifications.Telegram.APIToken)
-		if err != nil {
-			return nil, fmt.Errorf("telegram setup: %w", err)
+	if configuration.Notifications.Telegram != nil && configuration.Notifications.Telegram.Enabled {
+		if configuration.Notifications.Telegram.APIToken != "" {
+			logger.Info("Notifications: using telegram")
+			telegramService, err := telegram.New(configuration.Notifications.Telegram.APIToken)
+			if err != nil {
+				return nil, fmt.Errorf("telegram setup: %w", err)
+			}
+			telegramService.AddReceivers(configuration.Notifications.Telegram.ChatIDs...)
+			services = append(services, telegramService)
 		}
-		telegramService.AddReceivers(configuration.Notifications.Telegram.ChatIDs...)
-		services = append(services, telegramService)
 	}
 
-	if configuration.Notifications.Discord.BotToken != "" || configuration.Notifications.Discord.OAuthToken != "" {
-		logger.Info("Notifications: using discord")
-		discordService := discord.New()
-		if configuration.Notifications.Discord.BotToken != "" {
-			if err := discordService.AuthenticateWithBotToken(configuration.Notifications.Discord.BotToken); err != nil {
-				return nil, fmt.Errorf("discord bot token setup: %w", err)
+	if configuration.Notifications.Discord != nil && configuration.Notifications.Discord.Enabled {
+		if configuration.Notifications.Discord.BotToken != "" || configuration.Notifications.Discord.OAuthToken != "" {
+			logger.Info("Notifications: using discord")
+			discordService := discord.New()
+			if configuration.Notifications.Discord.BotToken != "" {
+				if err := discordService.AuthenticateWithBotToken(configuration.Notifications.Discord.BotToken); err != nil {
+					return nil, fmt.Errorf("discord bot token setup: %w", err)
+				}
+			} else if configuration.Notifications.Discord.OAuthToken != "" {
+				if err := discordService.AuthenticateWithOAuth2Token(configuration.Notifications.Discord.OAuthToken); err != nil {
+					return nil, fmt.Errorf("discord oauth token setup: %w", err)
+				}
+			} else {
+				panic("logic error")
 			}
-		} else if configuration.Notifications.Discord.OAuthToken != "" {
-			if err := discordService.AuthenticateWithOAuth2Token(configuration.Notifications.Discord.OAuthToken); err != nil {
-				return nil, fmt.Errorf("discord oauth token setup: %w", err)
-			}
-		} else {
-			panic("logic error")
+			discordService.AddReceivers(configuration.Notifications.Discord.ChannelIDs...)
+			services = append(services, discordService)
 		}
-		discordService.AddReceivers(configuration.Notifications.Discord.ChannelIDs...)
-		services = append(services, discordService)
 	}
 
-	if configuration.Notifications.Email.Server != "" {
-		logger.Info("Notifications: using email")
-		mailHost := net.JoinHostPort(configuration.Notifications.Email.Server, strconv.Itoa(configuration.Notifications.Email.Port))
-		mailService := mail.New(configuration.Notifications.Email.Sender, mailHost)
-		mailService.BodyFormat(mail.PlainText)
-		if configuration.Notifications.Email.Username != "" && configuration.Notifications.Email.Password != "" {
-			mailService.AuthenticateSMTP(
-				"",
-				configuration.Notifications.Email.Username,
-				configuration.Notifications.Email.Password,
-				configuration.Notifications.Email.Server,
+	if configuration.Notifications.Email != nil && configuration.Notifications.Email.Enabled {
+		if configuration.Notifications.Email.Server != "" {
+			logger.Info("Notifications: using email")
+			mailHost := net.JoinHostPort(configuration.Notifications.Email.Server, strconv.Itoa(configuration.Notifications.Email.Port))
+			mailService := mail.New(configuration.Notifications.Email.Sender, mailHost)
+			mailService.BodyFormat(mail.PlainText)
+			if configuration.Notifications.Email.Username != "" && configuration.Notifications.Email.Password != "" {
+				mailService.AuthenticateSMTP(
+					"",
+					configuration.Notifications.Email.Username,
+					configuration.Notifications.Email.Password,
+					configuration.Notifications.Email.Server,
+				)
+			}
+			mailService.AddReceivers(configuration.Notifications.Email.Recipients...)
+			services = append(services, mailService)
+		}
+	}
+
+	if configuration.Notifications.SendGrid != nil && configuration.Notifications.SendGrid.Enabled {
+		if configuration.Notifications.SendGrid.APIKey != "" {
+			logger.Info("Notifications: using sendgrid")
+			sendGridService := sendgrid.New(
+				configuration.Notifications.SendGrid.APIKey,
+				configuration.Notifications.SendGrid.SenderAddress,
+				configuration.Notifications.SendGrid.SenderName,
 			)
+			sendGridService.AddReceivers(configuration.Notifications.SendGrid.Recipients...)
+			services = append(services, sendGridService)
 		}
-		mailService.AddReceivers(configuration.Notifications.Email.Recipients...)
-		services = append(services, mailService)
 	}
 
-	if configuration.Notifications.SendGrid.APIKey != "" {
-		logger.Info("Notifications: using sendgrid")
-		sendGridService := sendgrid.New(
-			configuration.Notifications.SendGrid.APIKey,
-			configuration.Notifications.SendGrid.SenderAddress,
-			configuration.Notifications.SendGrid.SenderName,
-		)
-		sendGridService.AddReceivers(configuration.Notifications.SendGrid.Recipients...)
-		services = append(services, sendGridService)
-	}
-
-	if len(configuration.Notifications.MSTeams.Webhooks) > 0 {
-		logger.Info("Notifications: using msteams")
-		msteamsService := msteams.New()
-		msteamsService.AddReceivers(configuration.Notifications.MSTeams.Webhooks...)
-		services = append(services, msteamsService)
+	if configuration.Notifications.MSTeams != nil && configuration.Notifications.MSTeams.Enabled {
+		if len(configuration.Notifications.MSTeams.Webhooks) > 0 {
+			logger.Info("Notifications: using msteams")
+			msteamsService := msteams.New()
+			msteamsService.AddReceivers(configuration.Notifications.MSTeams.Webhooks...)
+			services = append(services, msteamsService)
+		}
 	}
 
 	not.UseServices(services...)

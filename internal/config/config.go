@@ -1,13 +1,15 @@
 package config
 
 import (
-	"fmt"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/knadh/koanf/parsers/json"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/providers/structs"
 	"github.com/knadh/koanf/v2"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type Configuration struct {
@@ -16,72 +18,75 @@ type Configuration struct {
 	Mail          Mail          `koanf:"mail"`
 	Database      Database      `koanf:"database"`
 	Notifications Notification  `koanf:"notifications"`
-	Timeout       time.Duration `koanf:"timeout"`
+	Timeout       time.Duration `koanf:"timeout" validate:"required"`
 }
 
 type Server struct {
-	Listen               string        `koanf:"listen"`
-	PprofListen          string        `koanf:"listen_pprof"`
-	GracefulTimeout      time.Duration `koanf:"graceful_timeout"`
-	TLS                  TLS           `koanf:"tls"`
+	Listen               string        `koanf:"listen" validate:"required,hostname_port"`
+	PprofListen          string        `koanf:"listen_pprof" validate:"required,hostname_port"`
+	GracefulTimeout      time.Duration `koanf:"graceful_timeout" validate:"required"`
 	Cloudflare           bool          `koanf:"cloudflare"`
-	SecretKeyHeaderName  string        `koanf:"secret_key_header_name"`
-	SecretKeyHeaderValue string        `koanf:"secret_key_header_value"`
+	SecretKeyHeaderName  string        `koanf:"secret_key_header_name" validate:"required"`
+	SecretKeyHeaderValue string        `koanf:"secret_key_header_value" validate:"required"`
+	TLS                  TLS           `koanf:"tls"`
 }
 
 type TLS struct {
-	PublicKey       string `koanf:"public_key"`
-	PrivateKey      string `koanf:"private_key"`
-	MTLSRootCA      string `koanf:"mtls_root_ca"`
+	PublicKey       string `koanf:"public_key" validate:"omitempty,file"`
+	PrivateKey      string `koanf:"private_key" validate:"omitempty,file"`
+	MTLSRootCA      string `koanf:"mtls_root_ca" validate:"omitempty,file"`
 	MTLSCertSubject string `koanf:"mtls_cert_subject"`
 }
 
 type Cache struct {
 	Enabled bool          `koanf:"enabled"`
-	Timeout time.Duration `koanf:"timeout"`
+	Timeout time.Duration `koanf:"timeout" validate:"required"`
 }
 
 type Mail struct {
 	Enabled bool   `koanf:"enabled"`
-	Server  string `koanf:"server"`
-	Port    int    `koanf:"port"`
+	Server  string `koanf:"server" validate:"required"`
+	Port    int    `koanf:"port" validate:"required,gt=0,lte=65535"`
 	From    struct {
-		Name string `koanf:"name"`
-		Mail string `koanf:"mail"`
+		Name string `koanf:"name" validate:"required"`
+		Mail string `koanf:"email" validate:"required,email"`
 	} `koanf:"from"`
-	To       []string      `koanf:"to"`
+	To       []string      `koanf:"to" validate:"required,dive,email"`
 	User     string        `koanf:"user"`
 	Password string        `koanf:"password"`
 	TLS      bool          `koanf:"tls"`
 	StartTLS bool          `koanf:"starttls"`
 	SkipTLS  bool          `koanf:"skiptls"`
-	Retries  int           `koanf:"retries"`
-	Timeout  time.Duration `koanf:"timeout"`
+	Retries  int           `koanf:"retries" validate:"required"`
+	Timeout  time.Duration `koanf:"timeout" validate:"required"`
 }
 
 type Database struct {
-	Filename string `koanf:"filename"`
+	Filename string `koanf:"filename" validate:"required"`
 }
 
 type Notification struct {
-	Telegram NotificationTelegram `koanf:"telegram"`
-	Discord  NotificationDiscord  `koanf:"discord"`
-	Email    NotificationEmail    `koanf:"email"`
-	SendGrid NotificationSendGrid `koanf:"sendgrid"`
-	MSTeams  NotificationMSTeams  `koanf:"msteams"`
+	Telegram *NotificationTelegram `koanf:"telegram"`
+	Discord  *NotificationDiscord  `koanf:"discord"`
+	Email    *NotificationEmail    `koanf:"email"`
+	SendGrid *NotificationSendGrid `koanf:"sendgrid"`
+	MSTeams  *NotificationMSTeams  `koanf:"msteams"`
 }
 
 type NotificationTelegram struct {
+	Enabled  bool    `koanf:"enabled"`
 	APIToken string  `koanf:"api_token"`
 	ChatIDs  []int64 `koanf:"chat_ids"`
 }
 type NotificationDiscord struct {
+	Enabled    bool     `koanf:"enabled"`
 	BotToken   string   `koanf:"bot_token"`
 	OAuthToken string   `koanf:"oauth_token"`
 	ChannelIDs []string `koanf:"channel_ids"`
 }
 
 type NotificationEmail struct {
+	Enabled    bool     `koanf:"enabled"`
 	Sender     string   `koanf:"sender"`
 	Server     string   `koanf:"server"`
 	Port       int      `koanf:"port"`
@@ -91,6 +96,7 @@ type NotificationEmail struct {
 }
 
 type NotificationSendGrid struct {
+	Enabled       bool     `koanf:"enabled"`
 	APIKey        string   `koanf:"api_key"`
 	SenderAddress string   `koanf:"sender_address"`
 	SenderName    string   `koanf:"sender_name"`
@@ -98,6 +104,7 @@ type NotificationSendGrid struct {
 }
 
 type NotificationMSTeams struct {
+	Enabled  bool     `koanf:"enabled"`
 	Webhooks []string `koanf:"webhooks"`
 }
 
@@ -120,6 +127,8 @@ var defaultConfig = Configuration{
 }
 
 func GetConfig(f string) (Configuration, error) {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+
 	k := koanf.NewWithConf(koanf.Conf{
 		Delim: ".",
 	})
@@ -137,12 +146,17 @@ func GetConfig(f string) (Configuration, error) {
 		return Configuration{}, err
 	}
 
-	if config.Server.SecretKeyHeaderName == "" {
-		return Configuration{}, fmt.Errorf("please supply a secret key header name in the config")
-	}
+	if err := validate.Struct(config); err != nil {
+		if _, ok := err.(*validator.InvalidValidationError); ok {
+			return Configuration{}, err
+		}
 
-	if config.Server.SecretKeyHeaderValue == "" {
-		return Configuration{}, fmt.Errorf("please supply a secret key header value in the config")
+		var resultErr error
+		for _, err := range err.(validator.ValidationErrors) {
+			// TODO: create new error with own message
+			resultErr = multierror.Append(resultErr, err)
+		}
+		return Configuration{}, resultErr
 	}
 
 	return config, nil

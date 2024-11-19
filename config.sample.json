@@ -1,25 +1,35 @@
 {
   "server": {
     "listen": "127.0.0.1:8000",
-    "listen_pprof": "127.0.0.1:1234"
+    "listen_pprof": "127.0.0.1:1234",
+    "graceful_timeout": "5s",
+    "cloudflare": false,
+    "secret_key_header_name": "X-Secret-Key-Header",
+    "secret_key_header_value": "SECRET",
+    "tls": {
+      "public_key": "public.pem",
+      "private_key": "private.pem",
+      "mtls_root_ca": "rootcas.pem",
+      "mtls_cert_subject": "Subject"
+    }
   },
   "cache": {
     "enabled": true,
     "timeout": "1h"
   },
-  "cloudflare": false,
   "timeout": "5s",
-  "secret_key_header_name": "X-Secret-Key-Header",
-  "secret_key_header_value": "SECRET",
   "mail": {
     "enabled": true,
     "server": "server.com",
     "port": 25,
     "from": {
       "name": "From",
-      "email": "email"
+      "email": "user@domain.com"
     },
-    "to": "user@domain.com",
+    "to": [
+      "user1@domain.com",
+      "user2@domain.com"
+    ],
     "user": "username",
     "password": "password",
     "tls": false,
@@ -28,23 +38,29 @@
     "retries": 5,
     "timeout": "5s"
   },
+  "database": {
+    "filename": "data.db"
+  },
   "notifications": {
     "telegram": {
-      "api_token": "",
+      "enabled": true,
+      "api_token": "token",
       "chat_ids": [
         1,
         2
       ]
     },
     "discord": {
-      "bot_token": "",
-      "oauth_token": "",
+      "enabled": true,
+      "bot_token": "token",
+      "oauth_token": "token",
       "channel_ids": [
         "1",
         "2"
       ]
     },
     "email": {
+      "enabled": true,
       "sender": "test@test.com",
       "server": "smtp.server.com",
       "port": 25,
@@ -56,7 +72,8 @@
       ]
     },
     "sendgrid": {
-      "api_key": "",
+      "enabled": true,
+      "api_key": "apikey",
       "sender_address": "test@test.com",
       "sender_name": "Test",
       "recipients": [
@@ -65,6 +82,7 @@
       ]
     },
     "msteams": {
+      "enabled": true,
       "webhooks": [
         "url1",
         "url2"

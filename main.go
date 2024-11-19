@@ -16,6 +16,7 @@ import (
 	"github.com/firefart/go-webserver-template/internal/database"
 	"github.com/firefart/go-webserver-template/internal/mail"
 	"github.com/firefart/go-webserver-template/internal/server"
+	"github.com/hashicorp/go-multierror"
 
 	"github.com/nikoksr/notify"
 
@@ -46,9 +47,11 @@ func main() {
 	var configFilename string
 	var jsonOutput bool
 	var version bool
+	var configCheckMode bool
 	flag.BoolVar(&debugMode, "debug", false, "Enable DEBUG mode")
 	flag.StringVar(&configFilename, "config", "", "config file to use")
 	flag.BoolVar(&jsonOutput, "json", false, "output in json instead")
+	flag.BoolVar(&configCheckMode, "configcheck", false, "just check the config")
 	flag.BoolVar(&version, "version", false, "show version")
 	flag.Parse()
 
@@ -64,10 +67,30 @@ func main() {
 
 	logger := newLogger(debugMode, jsonOutput)
 	ctx := context.Background()
-	if err := run(ctx, logger, configFilename, debugMode); err != nil {
+	var err error
+	if configCheckMode {
+		err = configCheck(configFilename)
+	} else {
+		err = run(ctx, logger, configFilename, debugMode)
+	}
+
+	if err != nil {
+		// check if we have a multierror
+		if merr, ok := err.(*multierror.Error); ok {
+			for _, e := range merr.Errors {
+				logger.Error(e.Error())
+			}
+			os.Exit(1)
+		}
+		// a normal error
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
+}
+
+func configCheck(configFilename string) error {
+	_, err := config.GetConfig(configFilename)
+	return err
 }
 
 func run(ctx context.Context, logger *slog.Logger, configFilename string, debugMode bool) error {

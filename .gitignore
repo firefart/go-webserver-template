@@ -33,7 +33,7 @@ config.json
 *.sqlite3-shm
 *.sqlite3-whl
 *.sqlite3-wal
-.vscode/
+*.pem
 tmp/
 node_modules/
 package.json
