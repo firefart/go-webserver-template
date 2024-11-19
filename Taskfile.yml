@@ -61,6 +61,11 @@ tasks:
     cmds:
       - ./{{.PROGRAM}} -debug -config config.json
 
+  configcheck:
+    deps: [build]
+    cmds:
+      - ./{{.PROGRAM}} -configcheck -config config.json
+
   htmx-update:
     cmds:
       - wget -nv -O ./internal/server/assets/web/scripts/htmx.min.js https://unpkg.com/htmx.org@latest/dist/htmx.min.js
