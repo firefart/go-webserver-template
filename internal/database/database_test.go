@@ -34,7 +34,7 @@ func TestNew(t *testing.T) {
 			Filename: file.Name(),
 		},
 	}
-	db, err := New(context.Background(), configuration, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	db, err := New(context.Background(), configuration, slog.New(slog.NewTextHandler(io.Discard, nil)), false)
 	require.Nil(t, err)
 	err = db.Close(1 * time.Second)
 	require.Nil(t, err)

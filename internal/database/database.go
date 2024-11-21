@@ -29,20 +29,20 @@ type Database struct {
 	writerRAW *sql.DB
 }
 
-func New(ctx context.Context, configuration config.Configuration, logger *slog.Logger) (*Database, error) {
+func New(ctx context.Context, configuration config.Configuration, logger *slog.Logger, debug bool) (*Database, error) {
 	if strings.ToLower(configuration.Database.Filename) == ":memory:" {
 		// not possible because of the two db instances, with in memory they
 		// would be separate instances
 		return nil, fmt.Errorf("in memory databases are not supported")
 	}
 
-	reader, err := newDatabase(ctx, configuration, logger, true)
+	reader, err := newDatabase(ctx, configuration, logger, debug, true)
 	if err != nil {
 		return nil, fmt.Errorf("could not create reader: %w", err)
 	}
 	reader.SetMaxOpenConns(100)
 	// no migrations on the second connection
-	writer, err := newDatabase(ctx, configuration, logger, false)
+	writer, err := newDatabase(ctx, configuration, logger, debug, false)
 	if err != nil {
 		return nil, fmt.Errorf("could not create writer: %w", err)
 	}
@@ -58,7 +58,7 @@ func New(ctx context.Context, configuration config.Configuration, logger *slog.L
 	}, nil
 }
 
-func newDatabase(ctx context.Context, configuration config.Configuration, logger *slog.Logger, skipMigrations bool) (*sql.DB, error) {
+func newDatabase(ctx context.Context, configuration config.Configuration, logger *slog.Logger, debug bool, skipMigrations bool) (*sql.DB, error) {
 	db, err := sql.Open("sqlite", fmt.Sprintf("%s?_pragma=journal_mode(WAL)&_pragma=foreign_keys(1)", configuration.Database.Filename))
 	if err != nil {
 		return nil, fmt.Errorf("could not open database %s: %w", configuration.Database.Filename, err)
@@ -71,7 +71,12 @@ func newDatabase(ctx context.Context, configuration config.Configuration, logger
 			return nil, fmt.Errorf("could not sub migration fs: %w", err)
 		}
 
-		prov, err := goose.NewProvider("sqlite3", db, migrationFS)
+		options := []goose.ProviderOption{}
+		if debug {
+			options = append(options, goose.WithVerbose(debug))
+		}
+
+		prov, err := goose.NewProvider("sqlite3", db, migrationFS, options...)
 		if err != nil {
 			return nil, fmt.Errorf("could not create goose provider: %w", err)
 		}

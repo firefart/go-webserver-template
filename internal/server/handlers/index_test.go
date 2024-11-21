@@ -57,7 +57,7 @@ func TestIndex(t *testing.T) {
 		},
 	}
 
-	db, err := database.New(ctx, configuration, logger)
+	db, err := database.New(ctx, configuration, logger, false)
 	require.Nil(t, err)
 
 	e := server.NewServer(ctx, server.WithConfig(configuration), server.WithDB(db))

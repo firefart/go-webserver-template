@@ -14,7 +14,7 @@ require (
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/mattn/go-isatty v0.0.20
 	github.com/nikoksr/notify v1.1.0
-	github.com/pressly/goose/v3 v3.22.1
+	github.com/pressly/goose/v3 v3.23.0
 	github.com/stretchr/testify v1.9.0
 	github.com/wneessen/go-mail v0.5.2
 	go.uber.org/automaxprocs v1.6.0

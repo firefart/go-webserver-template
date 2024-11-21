@@ -29,7 +29,7 @@ func TestGetAllDummy(t *testing.T) {
 		},
 	}
 	ctx := context.Background()
-	db, err := database.New(ctx, configuration, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	db, err := database.New(ctx, configuration, slog.New(slog.NewTextHandler(io.Discard, nil)), false)
 	require.Nil(t, err)
 	defer db.Close(1 * time.Second)
 
