@@ -17,7 +17,7 @@ func NewVersionHandler() *VersionHandler {
 func (h *VersionHandler) EchoHandler(c echo.Context) error {
 	buildInfo, ok := debug.ReadBuildInfo()
 	if !ok {
-		return fmt.Errorf("Unable to determine version information")
+		return fmt.Errorf("unable to determine version information")
 	}
 	return c.String(http.StatusOK, buildInfo.String())
 }

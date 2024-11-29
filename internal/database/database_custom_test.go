@@ -21,7 +21,12 @@ func TestGetAllDummy(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer os.Remove(file.Name())
+	defer func(name string) {
+		err := os.Remove(name)
+		if err != nil {
+			require.Nil(t, err)
+		}
+	}(file.Name())
 
 	configuration := config.Configuration{
 		Database: config.Database{
@@ -31,7 +36,12 @@ func TestGetAllDummy(t *testing.T) {
 	ctx := context.Background()
 	db, err := database.New(ctx, configuration, slog.New(slog.NewTextHandler(io.Discard, nil)), false)
 	require.Nil(t, err)
-	defer db.Close(1 * time.Second)
+	defer func(db *database.Database, timeout time.Duration) {
+		err := db.Close(timeout)
+		if err != nil {
+			require.Nil(t, err)
+		}
+	}(db, 1*time.Second)
 
 	id, err := db.InsertDummy(ctx, "Test")
 	require.Nil(t, err)

@@ -12,12 +12,32 @@ import (
 func TestParseConfig(t *testing.T) {
 	public, err := os.CreateTemp("", "test")
 	require.Nil(t, err)
-	defer public.Close()
-	defer os.Remove(public.Name())
+	defer func(public *os.File) {
+		err := public.Close()
+		if err != nil {
+			require.Nil(t, err)
+		}
+	}(public)
+	defer func(name string) {
+		err := os.Remove(name)
+		if err != nil {
+			require.Nil(t, err)
+		}
+	}(public.Name())
 	private, err := os.CreateTemp("", "test")
 	require.Nil(t, err)
-	defer private.Close()
-	defer os.Remove(private.Name())
+	defer func(private *os.File) {
+		err := private.Close()
+		if err != nil {
+			require.Nil(t, err)
+		}
+	}(private)
+	defer func(name string) {
+		err := os.Remove(name)
+		if err != nil {
+			require.Nil(t, err)
+		}
+	}(private.Name())
 
 	config := fmt.Sprintf(`{
   "server": {
@@ -115,8 +135,18 @@ func TestParseConfig(t *testing.T) {
 	f, err := os.CreateTemp("", "config")
 	require.Nil(t, err)
 	tmpFilename := f.Name()
-	defer f.Close()
-	defer os.Remove(tmpFilename)
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			require.Nil(t, err)
+		}
+	}(f)
+	defer func(name string) {
+		err := os.Remove(name)
+		if err != nil {
+			require.Nil(t, err)
+		}
+	}(tmpFilename)
 	_, err = f.WriteString(config)
 	require.Nil(t, err)
 

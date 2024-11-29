@@ -45,7 +45,12 @@ func TestIndex(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(file.Name())
+	defer func(name string) {
+		err := os.Remove(name)
+		if err != nil {
+			require.Nil(t, err)
+		}
+	}(file.Name())
 
 	configuration := config.Configuration{
 		Database: config.Database{

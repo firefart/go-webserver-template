@@ -71,7 +71,7 @@ func newDatabase(ctx context.Context, configuration config.Configuration, logger
 			return nil, fmt.Errorf("could not sub migration fs: %w", err)
 		}
 
-		options := []goose.ProviderOption{}
+		var options []goose.ProviderOption
 		if debug {
 			options = append(options, goose.WithVerbose(debug))
 		}

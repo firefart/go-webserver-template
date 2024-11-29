@@ -27,7 +27,12 @@ func TestNew(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer os.Remove(file.Name())
+	defer func(name string) {
+		err := os.Remove(name)
+		if err != nil {
+			require.Nil(t, err)
+		}
+	}(file.Name())
 
 	configuration := config.Configuration{
 		Database: config.Database{
@@ -95,7 +100,12 @@ func TestMigrations(t *testing.T) {
 	// check for leftover indexes
 	rows, err := db.Query("SELECT name FROM sqlite_master WHERE type = 'index'")
 	require.Nil(t, err)
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			require.Nil(t, err)
+		}
+	}(rows)
 
 	var indexNames []string
 	for rows.Next() {
@@ -111,7 +121,12 @@ func TestMigrations(t *testing.T) {
 	// check for leftover tables
 	rows, err = db.Query("SELECT name FROM sqlite_master WHERE type = 'table' and name != 'goose_db_version' and name != 'sqlite_sequence'")
 	require.Nil(t, err)
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			require.Nil(t, err)
+		}
+	}(rows)
 
 	var tableNames []string
 	for rows.Next() {
