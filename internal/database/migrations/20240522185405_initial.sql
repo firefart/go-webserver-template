@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 CREATE TABLE dummy
 (
-    id      INTEGER NOT NULL PRIMARY KEY,
+    id      INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     name    TEXT    NOT NULL UNIQUE,
     updated DATETIME DEFAULT CURRENT_TIMESTAMP
 );
