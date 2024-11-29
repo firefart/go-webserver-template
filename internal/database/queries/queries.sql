@@ -5,5 +5,5 @@ order by id;
 
 -- name: InsertDummy :one
 INSERT INTO dummy(name)
-VALUES(?)
+VALUES (?)
 RETURNING *;

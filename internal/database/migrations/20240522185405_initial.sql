@@ -1,11 +1,12 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE dummy (
-  id INTEGER NOT NULL PRIMARY KEY,
-  name TEXT NOT NULL UNIQUE,
-  updated DATETIME DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE dummy
+(
+    id      INTEGER NOT NULL PRIMARY KEY,
+    name    TEXT    NOT NULL UNIQUE,
+    updated DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX idx_name ON dummy(name);
+CREATE INDEX idx_name ON dummy (name);
 -- +goose StatementEnd
 
 -- +goose Down

@@ -9,13 +9,13 @@ tasks:
       - go mod tidy -v
 
   update:
-    deps: [htmx-update, generate]
+    deps: [ htmx-update, generate ]
     cmds:
       - go get -u
       - go mod tidy -v
 
   generate:
-    deps: [sqlc, templ, tailwind]
+    deps: [ sqlc, templ, tailwind ]
 
   sqlc:
     cmds:
@@ -38,8 +38,8 @@ tasks:
       - npm audit fix
 
   build:
-    aliases: [default]
-    deps: [deps, generate]
+    aliases: [ default ]
+    deps: [ deps, generate ]
     env:
       CGO_ENABLED: 0
     cmds:
@@ -50,19 +50,19 @@ tasks:
       - go build -o {{.PROGRAM}}
 
   test:
-    deps: [deps, generate]
+    deps: [ deps, generate ]
     env:
       CGO_ENABLED: 1 # required by -race
     cmds:
       - go test -race -cover ./...
 
   run:
-    deps: [build]
+    deps: [ build ]
     cmds:
       - ./{{.PROGRAM}} -debug -config config.json
 
   configcheck:
-    deps: [build]
+    deps: [ build ]
     cmds:
       - ./{{.PROGRAM}} -configcheck -config config.json
 
