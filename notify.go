@@ -20,7 +20,7 @@ func setupNotifications(configuration config.Configuration, logger *slog.Logger)
 	not := notify.New()
 	var services []notify.Notifier
 
-	if configuration.Notifications.Telegram != nil && configuration.Notifications.Telegram.Enabled {
+	if configuration.Notifications.Telegram.Enabled {
 		if configuration.Notifications.Telegram.APIToken != "" {
 			logger.Info("Notifications: using telegram")
 			telegramService, err := telegram.New(configuration.Notifications.Telegram.APIToken)
@@ -32,7 +32,7 @@ func setupNotifications(configuration config.Configuration, logger *slog.Logger)
 		}
 	}
 
-	if configuration.Notifications.Discord != nil && configuration.Notifications.Discord.Enabled {
+	if configuration.Notifications.Discord.Enabled {
 		if configuration.Notifications.Discord.BotToken != "" || configuration.Notifications.Discord.OAuthToken != "" {
 			logger.Info("Notifications: using discord")
 			discordService := discord.New()
@@ -52,7 +52,7 @@ func setupNotifications(configuration config.Configuration, logger *slog.Logger)
 		}
 	}
 
-	if configuration.Notifications.Email != nil && configuration.Notifications.Email.Enabled {
+	if configuration.Notifications.Email.Enabled {
 		if configuration.Notifications.Email.Server != "" {
 			logger.Info("Notifications: using email")
 			mailHost := net.JoinHostPort(configuration.Notifications.Email.Server, strconv.Itoa(configuration.Notifications.Email.Port))
@@ -71,7 +71,7 @@ func setupNotifications(configuration config.Configuration, logger *slog.Logger)
 		}
 	}
 
-	if configuration.Notifications.SendGrid != nil && configuration.Notifications.SendGrid.Enabled {
+	if configuration.Notifications.SendGrid.Enabled {
 		if configuration.Notifications.SendGrid.APIKey != "" {
 			logger.Info("Notifications: using sendgrid")
 			sendGridService := sendgrid.New(
@@ -84,7 +84,7 @@ func setupNotifications(configuration config.Configuration, logger *slog.Logger)
 		}
 	}
 
-	if configuration.Notifications.MSTeams != nil && configuration.Notifications.MSTeams.Enabled {
+	if configuration.Notifications.MSTeams.Enabled {
 		if len(configuration.Notifications.MSTeams.Webhooks) > 0 {
 			logger.Info("Notifications: using msteams")
 			msteamsService := msteams.New()

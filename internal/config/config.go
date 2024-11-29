@@ -66,11 +66,11 @@ type Database struct {
 }
 
 type Notification struct {
-	Telegram *NotificationTelegram `koanf:"telegram"`
-	Discord  *NotificationDiscord  `koanf:"discord"`
-	Email    *NotificationEmail    `koanf:"email"`
-	SendGrid *NotificationSendGrid `koanf:"sendgrid"`
-	MSTeams  *NotificationMSTeams  `koanf:"msteams"`
+	Telegram NotificationTelegram `koanf:"telegram"`
+	Discord  NotificationDiscord  `koanf:"discord"`
+	Email    NotificationEmail    `koanf:"email"`
+	SendGrid NotificationSendGrid `koanf:"sendgrid"`
+	MSTeams  NotificationMSTeams  `koanf:"msteams"`
 }
 
 type NotificationTelegram struct {
