@@ -40,7 +40,7 @@ func (q *Queries) GetAllDummy(ctx context.Context) ([]Dummy, error) {
 
 const insertDummy = `-- name: InsertDummy :one
 INSERT INTO dummy(name)
-VALUES(?)
+VALUES (?)
 RETURNING id, name, updated
 `
 
