@@ -94,7 +94,7 @@ func TestParseConfig(t *testing.T) {
     "discord": {
       "enabled": true,
       "bot_token": "token",
-      "oauth_token": "token",
+      "oauth_token": "",
       "channel_ids": [
         "1",
         "2"
@@ -125,8 +125,8 @@ func TestParseConfig(t *testing.T) {
     "msteams": {
       "enabled": true,
       "webhooks": [
-        "url1",
-        "url2"
+        "https://url1.com",
+        "https://url2.com"
       ]
     }
   }
@@ -196,7 +196,7 @@ func TestParseConfig(t *testing.T) {
 	require.Equal(t, "1", c.Notifications.Discord.ChannelIDs[0])
 	require.Equal(t, "2", c.Notifications.Discord.ChannelIDs[1])
 	require.Equal(t, "token", c.Notifications.Discord.BotToken)
-	require.Equal(t, "token", c.Notifications.Discord.OAuthToken)
+	require.Equal(t, "", c.Notifications.Discord.OAuthToken)
 
 	require.Equal(t, "test@test.com", c.Notifications.Email.Sender)
 	require.Equal(t, "smtp.server.com", c.Notifications.Email.Server)
@@ -215,6 +215,6 @@ func TestParseConfig(t *testing.T) {
 	require.Equal(t, "a@a.com", c.Notifications.SendGrid.Recipients[1])
 
 	require.Len(t, c.Notifications.MSTeams.Webhooks, 2)
-	require.Equal(t, "url1", c.Notifications.MSTeams.Webhooks[0])
-	require.Equal(t, "url2", c.Notifications.MSTeams.Webhooks[1])
+	require.Equal(t, "https://url1.com", c.Notifications.MSTeams.Webhooks[0])
+	require.Equal(t, "https://url2.com", c.Notifications.MSTeams.Webhooks[1])
 }

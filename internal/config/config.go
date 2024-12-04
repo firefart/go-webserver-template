@@ -76,37 +76,37 @@ type Notification struct {
 
 type NotificationTelegram struct {
 	Enabled  bool    `koanf:"enabled"`
-	APIToken string  `koanf:"api_token"`
-	ChatIDs  []int64 `koanf:"chat_ids"`
+	APIToken string  `koanf:"api_token" validate:"required_if=Enabled true"`
+	ChatIDs  []int64 `koanf:"chat_ids" validate:"required_if=Enabled true,dive"`
 }
 type NotificationDiscord struct {
 	Enabled    bool     `koanf:"enabled"`
-	BotToken   string   `koanf:"bot_token"`
-	OAuthToken string   `koanf:"oauth_token"`
-	ChannelIDs []string `koanf:"channel_ids"`
+	BotToken   string   `koanf:"bot_token" validate:"required_without=OAuthToken,excluded_with=OAuthToken"`
+	OAuthToken string   `koanf:"oauth_token" validate:"required_without=BotToken,excluded_with=BotToken"`
+	ChannelIDs []string `koanf:"channel_ids" validate:"required_if=Enabled true,dive"`
 }
 
 type NotificationEmail struct {
 	Enabled    bool     `koanf:"enabled"`
-	Sender     string   `koanf:"sender"`
-	Server     string   `koanf:"server"`
-	Port       int      `koanf:"port"`
+	Sender     string   `koanf:"sender" validate:"required_if=Enabled true,email"`
+	Server     string   `koanf:"server" validate:"required_if=Enabled true,fqdn"`
+	Port       int      `koanf:"port" validate:"required_if=Enabled true,gt=0,lte=65535"`
 	Username   string   `koanf:"username"`
 	Password   string   `koanf:"password"`
-	Recipients []string `koanf:"recipients"`
+	Recipients []string `koanf:"recipients" validate:"required_if=Enabled true,dive,email"`
 }
 
 type NotificationSendGrid struct {
 	Enabled       bool     `koanf:"enabled"`
-	APIKey        string   `koanf:"api_key"`
-	SenderAddress string   `koanf:"sender_address"`
-	SenderName    string   `koanf:"sender_name"`
-	Recipients    []string `koanf:"recipients"`
+	APIKey        string   `koanf:"api_key" validate:"required_if=Enabled true"`
+	SenderAddress string   `koanf:"sender_address" validate:"required_if=Enabled true,email"`
+	SenderName    string   `koanf:"sender_name" validate:"required_if=Enabled true"`
+	Recipients    []string `koanf:"recipients" validate:"required_if=Enabled true,dive,email"`
 }
 
 type NotificationMSTeams struct {
 	Enabled  bool     `koanf:"enabled"`
-	Webhooks []string `koanf:"webhooks"`
+	Webhooks []string `koanf:"webhooks" validate:"required_if=Enabled true,dive,http_url"`
 }
 
 var defaultConfig = Configuration{

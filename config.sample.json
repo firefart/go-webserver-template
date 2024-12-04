@@ -84,8 +84,8 @@
     "msteams": {
       "enabled": true,
       "webhooks": [
-        "url1",
-        "url2"
+        "https://url1.com",
+        "https://url2.com"
       ]
     }
   }
