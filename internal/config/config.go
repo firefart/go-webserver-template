@@ -25,6 +25,7 @@ type Configuration struct {
 type Server struct {
 	Listen               string        `koanf:"listen" validate:"required,hostname_port"`
 	PprofListen          string        `koanf:"listen_pprof" validate:"required,hostname_port"`
+	MetricsListen        string        `koanf:"listen_metrics" validate:"required,hostname_port"`
 	GracefulTimeout      time.Duration `koanf:"graceful_timeout" validate:"required"`
 	Cloudflare           bool          `koanf:"cloudflare"`
 	SecretKeyHeaderName  string        `koanf:"secret_key_header_name" validate:"required"`
@@ -113,6 +114,7 @@ var defaultConfig = Configuration{
 	Server: Server{
 		Listen:              "127.0.0.1:8000",
 		PprofListen:         "127.0.0.1:1234",
+		MetricsListen:       "127.0.0.1:1235",
 		GracefulTimeout:     10 * time.Second,
 		Cloudflare:          false,
 		SecretKeyHeaderName: "X-Secret-Key-Header",

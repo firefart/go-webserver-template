@@ -43,6 +43,7 @@ func TestParseConfig(t *testing.T) {
   "server": {
     "listen": "127.0.0.1:8000",
     "listen_pprof": "127.0.0.1:1234",
+		"listen_metrics": "127.0.0.1:1235",
     "graceful_timeout": "5s",
     "cloudflare": false,
     "secret_key_header_name": "X-Secret-Key-Header",
@@ -155,6 +156,7 @@ func TestParseConfig(t *testing.T) {
 
 	require.Equal(t, "127.0.0.1:8000", c.Server.Listen)
 	require.Equal(t, "127.0.0.1:1234", c.Server.PprofListen)
+	require.Equal(t, "127.0.0.1:1235", c.Server.MetricsListen)
 	require.Equal(t, 5*time.Second, c.Server.GracefulTimeout)
 	require.Equal(t, false, c.Server.Cloudflare)
 	require.Equal(t, "X-Secret-Key-Header", c.Server.SecretKeyHeaderName)

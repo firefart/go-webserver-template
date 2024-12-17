@@ -7,20 +7,26 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/firefart/go-webserver-template/internal/cacher"
 	"github.com/firefart/go-webserver-template/internal/config"
 	"github.com/firefart/go-webserver-template/internal/database"
+	"github.com/firefart/go-webserver-template/internal/metrics"
 	custommiddleware "github.com/firefart/go-webserver-template/internal/server/middleware"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/nikoksr/notify"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 type server struct {
-	logger *slog.Logger
-	config config.Configuration
-	db     database.Interface
-	notify *notify.Notify
-	debug  bool
+	logger       *slog.Logger
+	config       config.Configuration
+	db           database.Interface
+	notify       *notify.Notify
+	metrics      *metrics.Metrics
+	promRegistry prometheus.Registerer
+	cache        *cacher.Cache[string]
+	debug        bool
 }
 
 //go:embed assets

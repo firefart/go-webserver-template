@@ -12,24 +12,26 @@ import (
 	"runtime/debug"
 	"syscall"
 
+	"github.com/firefart/go-webserver-template/internal/cacher"
 	"github.com/firefart/go-webserver-template/internal/config"
 	"github.com/firefart/go-webserver-template/internal/database"
 	"github.com/firefart/go-webserver-template/internal/mail"
+	"github.com/firefart/go-webserver-template/internal/metrics"
 	"github.com/firefart/go-webserver-template/internal/server"
 	"github.com/hashicorp/go-multierror"
-
 	"github.com/nikoksr/notify"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.uber.org/automaxprocs/maxprocs"
 
 	_ "net/http/pprof"
-
-	"go.uber.org/automaxprocs/maxprocs"
 )
 
 type application struct {
 	logger *slog.Logger
 	debug  bool
 	config config.Configuration
-	cache  *Cache[string]
+	cache  *cacher.Cache[string]
 	notify *notify.Notify
 	db     *database.Database
 	mailer mail.Interface
@@ -129,7 +131,13 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 	}()
 	app.db = db
 
-	app.cache = NewCache[string](ctx, logger, "cache", configuration.Cache.Timeout)
+	reg := prometheus.NewRegistry()
+	m, err := metrics.NewMetrics(reg)
+	if err != nil {
+		return err
+	}
+
+	app.cache = cacher.New[string](ctx, logger, m, "cache", configuration.Cache.Timeout)
 
 	if configuration.Mail.Enabled {
 		app.mailer, err = mail.New(configuration, logger)
@@ -152,6 +160,8 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 		server.WithDB(app.db),
 		server.WithNotify(app.notify),
 		server.WithDebug(app.debug),
+		server.WithMetrics(m, reg),
+		server.WithCache(app.cache),
 	)
 
 	srv := &http.Server{
@@ -193,17 +203,34 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 		Addr: app.config.Server.PprofListen,
 	}
 	go func() {
-		metricsMux := http.NewServeMux()
+		pprofMux := http.NewServeMux()
 		// pprof is automatically added to the DefaultServeMux
 		// this is not used anywhere so it's safe to use the auto
 		// implementation. The following line makes sure we use
 		// the configuration from defaultservermux
 		// If you ever want to use the default serve mux: don't
 		// otherwise you will expose the debug endpoints
-		metricsMux.Handle("/debug/pprof/", http.DefaultServeMux)
+		pprofMux.Handle("/debug/pprof/", http.DefaultServeMux) // pprof is defined on the default servemux
+		pprofSrv.Handler = pprofMux
 		if err := pprofSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			app.logger.Error("error on pprof listenandserve", slog.String("err", err.Error()))
-			// emit signal to kill server
+			logger.Error("error on pprof", slog.String("err", err.Error()))
+			cancel()
+		}
+	}()
+
+	logger.Info("Starting metrics server",
+		slog.String("host", configuration.Server.MetricsListen),
+	)
+
+	metricsSrv := &http.Server{
+		Addr: configuration.Server.MetricsListen,
+	}
+	go func() {
+		metricsMux := http.NewServeMux()
+		metricsMux.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}))
+		metricsSrv.Handler = metricsMux
+		if err := metricsSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logger.Error("error on metric", slog.String("err", err.Error()))
 			cancel()
 		}
 	}()
@@ -219,6 +246,9 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 	}
 	if err := pprofSrv.Shutdown(shutdownCtx); err != nil {
 		app.logger.Error("error on pprofsrv shutdown", slog.String("err", err.Error()))
+	}
+	if err := metricsSrv.Shutdown(shutdownCtx); err != nil {
+		logger.Error("error on metricsSrv shutdown", slog.String("err", err.Error()))
 	}
 	return nil
 }

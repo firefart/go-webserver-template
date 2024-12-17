@@ -1,10 +1,12 @@
-package main
+package cacher
 
 import (
 	"context"
 	"log/slog"
 	"sync"
 	"time"
+
+	"github.com/firefart/go-webserver-template/internal/metrics"
 )
 
 type cacheEntry[T any] struct {
@@ -14,18 +16,20 @@ type cacheEntry[T any] struct {
 
 type Cache[T any] struct {
 	logger     *slog.Logger
+	metrics    *metrics.Metrics
 	mu         sync.RWMutex
 	cache      map[string]cacheEntry[T]
 	name       string
 	expiration time.Duration
 }
 
-func NewCache[T any](ctx context.Context, logger *slog.Logger, name string, expiration time.Duration) *Cache[T] {
+func New[T any](ctx context.Context, logger *slog.Logger, metrics *metrics.Metrics, name string, expiration time.Duration) *Cache[T] {
 	c := Cache[T]{
 		cache:      make(map[string]cacheEntry[T]),
 		logger:     logger,
 		name:       name,
 		expiration: expiration,
+		metrics:    metrics,
 	}
 
 	// start invalidator go function
@@ -60,9 +64,11 @@ func (c *Cache[T]) Get(key string) (T, bool) {
 	defer c.mu.RUnlock()
 	if x, ok := c.cache[key]; ok {
 		c.logger.Debug("returning cached entry", slog.String("name", c.name), slog.String("key", key), slog.Time("timestamp", x.timestamp))
+		c.metrics.CacheHits.WithLabelValues(c.name).Inc()
 		return x.value, true
 	}
 	var result T
+	c.metrics.CacheMisses.WithLabelValues(c.name).Inc()
 	return result, false
 }
 
