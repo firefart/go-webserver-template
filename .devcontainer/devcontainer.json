@@ -29,7 +29,8 @@
         "bradlc.vscode-tailwindcss",
         "otovo-oss.htmx-tags",
         "a-h.templ",
-        "rangav.vscode-thunder-client"
+        "rangav.vscode-thunder-client",
+        "Gruntfuggly.todo-tree"
       ]
     }
   }
