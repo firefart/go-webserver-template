@@ -3,7 +3,7 @@ module github.com/firefart/go-webserver-template
 go 1.23
 
 require (
-	github.com/a-h/templ v0.2.793
+	github.com/a-h/templ v0.3.819
 	github.com/charmbracelet/log v0.4.0
 	github.com/go-playground/validator/v10 v10.23.0
 	github.com/hashicorp/go-multierror v1.1.1
