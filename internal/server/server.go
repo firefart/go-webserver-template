@@ -5,11 +5,13 @@ import (
 	"embed"
 	"io"
 	"log/slog"
-	"net/http"
+	nethttp "net/http"
 
 	"github.com/firefart/go-webserver-template/internal/cacher"
 	"github.com/firefart/go-webserver-template/internal/config"
 	"github.com/firefart/go-webserver-template/internal/database"
+	"github.com/firefart/go-webserver-template/internal/http"
+	"github.com/firefart/go-webserver-template/internal/mail"
 	"github.com/firefart/go-webserver-template/internal/metrics"
 	custommiddleware "github.com/firefart/go-webserver-template/internal/server/middleware"
 	"github.com/labstack/echo/v4"
@@ -26,13 +28,15 @@ type server struct {
 	metrics      *metrics.Metrics
 	promRegistry prometheus.Registerer
 	cache        *cacher.Cache[string]
+	mailer       mail.Interface
+	httpClient   *http.Client
 	debug        bool
 }
 
 //go:embed assets
 var fsAssets embed.FS
 
-func NewServer(ctx context.Context, opts ...OptionsServerFunc) http.Handler {
+func NewServer(ctx context.Context, opts ...OptionsServerFunc) nethttp.Handler {
 	s := server{
 		logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
 		debug:  false,

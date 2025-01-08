@@ -15,11 +15,13 @@ import (
 
 type Configuration struct {
 	Server        Server        `koanf:"server"`
+	Proxy         *Proxy        `koanf:"proxy"`
 	Cache         Cache         `koanf:"cache"`
 	Mail          Mail          `koanf:"mail"`
 	Database      Database      `koanf:"database"`
 	Notifications Notification  `koanf:"notifications"`
 	Timeout       time.Duration `koanf:"timeout" validate:"required"`
+	UserAgent     string        `koanf:"user_agent"`
 }
 
 type Server struct {
@@ -38,6 +40,13 @@ type TLS struct {
 	PrivateKey      string `koanf:"private_key" validate:"omitempty,file"`
 	MTLSRootCA      string `koanf:"mtls_root_ca" validate:"omitempty,file"`
 	MTLSCertSubject string `koanf:"mtls_cert_subject"`
+}
+
+type Proxy struct {
+	URL      string `koanf:"url" json:"url" validate:"omitempty,url"`
+	Username string `koanf:"username" json:"username" validate:"required_with=Password"`
+	Password string `koanf:"password" json:"password" validate:"required_with=Username"`
+	NoProxy  string `koanf:"no_proxy" json:"no_proxy"`
 }
 
 type Cache struct {

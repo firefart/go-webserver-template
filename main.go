@@ -6,7 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
-	"net/http"
+	nethttp "net/http"
 	"os"
 	"os/signal"
 	"runtime/debug"
@@ -15,11 +15,11 @@ import (
 	"github.com/firefart/go-webserver-template/internal/cacher"
 	"github.com/firefart/go-webserver-template/internal/config"
 	"github.com/firefart/go-webserver-template/internal/database"
+	"github.com/firefart/go-webserver-template/internal/http"
 	"github.com/firefart/go-webserver-template/internal/mail"
 	"github.com/firefart/go-webserver-template/internal/metrics"
 	"github.com/firefart/go-webserver-template/internal/server"
 	"github.com/hashicorp/go-multierror"
-	"github.com/nikoksr/notify"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/automaxprocs/maxprocs"
@@ -29,12 +29,7 @@ import (
 
 type application struct {
 	logger *slog.Logger
-	debug  bool
 	config config.Configuration
-	cache  *cacher.Cache[string]
-	notify *notify.Notify
-	db     *database.Database
-	mailer mail.Interface
 }
 
 func init() {
@@ -100,11 +95,6 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	defer cancel()
 
-	app := &application{
-		logger: logger,
-		debug:  debugMode,
-	}
-
 	if configFilename == "" {
 		return fmt.Errorf("please provide a config file")
 	}
@@ -113,9 +103,13 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 	if err != nil {
 		return err
 	}
-	app.config = configuration
 
-	app.notify, err = setupNotifications(configuration, logger)
+	app := &application{
+		logger: logger,
+		config: configuration,
+	}
+
+	notify, err := setupNotifications(configuration, logger)
 	if err != nil {
 		return err
 	}
@@ -129,7 +123,6 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 			app.logger.Error("error on database close", slog.String("err", err.Error()))
 		}
 	}()
-	app.db = db
 
 	reg := prometheus.NewRegistry()
 	m, err := metrics.NewMetrics(reg)
@@ -137,34 +130,45 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 		return err
 	}
 
-	app.cache = cacher.New[string](ctx, logger, m, "cache", configuration.Cache.Timeout)
+	cache := cacher.New[string](ctx, logger, m, "cache", configuration.Cache.Timeout)
 
-	if configuration.Mail.Enabled {
-		app.mailer, err = mail.New(configuration, logger)
-		if err != nil {
-			return err
-		}
+	httpClient, err := http.NewHTTPClient(app.config, app.logger, debugMode)
+	if err != nil {
+		return err
 	}
 
 	app.logger.Info("Starting server",
 		slog.String("host", configuration.Server.Listen),
 		slog.Duration("gracefultimeout", configuration.Server.GracefulTimeout),
 		slog.Duration("timeout", configuration.Timeout),
-		slog.Bool("debug", app.debug),
+		slog.Bool("debug", debugMode),
 	)
+
+	options := []server.OptionsServerFunc{
+		server.WithLogger(app.logger),
+		server.WithConfig(app.config),
+		server.WithDB(db),
+		server.WithNotify(notify),
+		server.WithDebug(debugMode),
+		server.WithMetrics(m, reg),
+		server.WithCache(cache),
+		server.WithHTTPClient(httpClient),
+	}
+
+	if configuration.Mail.Enabled {
+		mailer, err := mail.New(configuration, logger)
+		if err != nil {
+			return err
+		}
+		options = append(options, server.WithMailer(mailer))
+	}
 
 	s := server.NewServer(
 		ctx,
-		server.WithLogger(app.logger),
-		server.WithConfig(app.config),
-		server.WithDB(app.db),
-		server.WithNotify(app.notify),
-		server.WithDebug(app.debug),
-		server.WithMetrics(m, reg),
-		server.WithCache(app.cache),
+		options...,
 	)
 
-	srv := &http.Server{
+	srv := &nethttp.Server{
 		Addr:         configuration.Server.Listen,
 		Handler:      s,
 		ReadTimeout:  configuration.Timeout,
@@ -179,7 +183,7 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 		srv.TLSConfig = tlsConfig
 
 		go func() {
-			if err := srv.ListenAndServeTLS(configuration.Server.TLS.PublicKey, configuration.Server.TLS.PrivateKey); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			if err := srv.ListenAndServeTLS(configuration.Server.TLS.PublicKey, configuration.Server.TLS.PrivateKey); err != nil && !errors.Is(err, nethttp.ErrServerClosed) {
 				app.logger.Error("error on listenandserveTLS", slog.String("err", err.Error()))
 				// emit signal to kill server
 				cancel()
@@ -187,7 +191,7 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 		}()
 	} else {
 		go func() {
-			if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			if err := srv.ListenAndServe(); err != nil && !errors.Is(err, nethttp.ErrServerClosed) {
 				app.logger.Error("error on listenandserve", slog.String("err", err.Error()))
 				// emit signal to kill server
 				cancel()
@@ -199,20 +203,20 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 		slog.String("host", app.config.Server.PprofListen),
 	)
 
-	pprofSrv := &http.Server{
+	pprofSrv := &nethttp.Server{
 		Addr: app.config.Server.PprofListen,
 	}
 	go func() {
-		pprofMux := http.NewServeMux()
+		pprofMux := nethttp.NewServeMux()
 		// pprof is automatically added to the DefaultServeMux
 		// this is not used anywhere so it's safe to use the auto
 		// implementation. The following line makes sure we use
 		// the configuration from defaultservermux
 		// If you ever want to use the default serve mux: don't
 		// otherwise you will expose the debug endpoints
-		pprofMux.Handle("/debug/pprof/", http.DefaultServeMux) // pprof is defined on the default servemux
+		pprofMux.Handle("/debug/pprof/", nethttp.DefaultServeMux) // pprof is defined on the default servemux
 		pprofSrv.Handler = pprofMux
-		if err := pprofSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := pprofSrv.ListenAndServe(); err != nil && !errors.Is(err, nethttp.ErrServerClosed) {
 			logger.Error("error on pprof", slog.String("err", err.Error()))
 			cancel()
 		}
@@ -222,14 +226,14 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 		slog.String("host", configuration.Server.MetricsListen),
 	)
 
-	metricsSrv := &http.Server{
+	metricsSrv := &nethttp.Server{
 		Addr: configuration.Server.MetricsListen,
 	}
 	go func() {
-		metricsMux := http.NewServeMux()
+		metricsMux := nethttp.NewServeMux()
 		metricsMux.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}))
 		metricsSrv.Handler = metricsMux
-		if err := metricsSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := metricsSrv.ListenAndServe(); err != nil && !errors.Is(err, nethttp.ErrServerClosed) {
 			logger.Error("error on metric", slog.String("err", err.Error()))
 			cancel()
 		}

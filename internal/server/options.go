@@ -6,6 +6,8 @@ import (
 	"github.com/firefart/go-webserver-template/internal/cacher"
 	"github.com/firefart/go-webserver-template/internal/config"
 	"github.com/firefart/go-webserver-template/internal/database"
+	"github.com/firefart/go-webserver-template/internal/http"
+	"github.com/firefart/go-webserver-template/internal/mail"
 	"github.com/firefart/go-webserver-template/internal/metrics"
 
 	"github.com/nikoksr/notify"
@@ -44,5 +46,17 @@ func WithMetrics(m *metrics.Metrics, reg prometheus.Registerer) OptionsServerFun
 func WithCache(cache *cacher.Cache[string]) OptionsServerFunc {
 	return func(c *server) {
 		c.cache = cache
+	}
+}
+
+func WithHTTPClient(client *http.Client) OptionsServerFunc {
+	return func(c *server) {
+		c.httpClient = client
+	}
+}
+
+func WithMailer(mailer mail.Interface) OptionsServerFunc {
+	return func(c *server) {
+		c.mailer = mailer
 	}
 }
