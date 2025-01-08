@@ -27,11 +27,6 @@ import (
 	_ "net/http/pprof"
 )
 
-type application struct {
-	logger *slog.Logger
-	config config.Configuration
-}
-
 func init() {
 	// added in init to prevent the forced logline
 	if _, err := maxprocs.Set(); err != nil {
@@ -104,11 +99,6 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 		return err
 	}
 
-	app := &application{
-		logger: logger,
-		config: configuration,
-	}
-
 	notify, err := setupNotifications(configuration, logger)
 	if err != nil {
 		return err
@@ -120,7 +110,7 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 	}
 	defer func() {
 		if err := db.Close(configuration.Server.GracefulTimeout); err != nil {
-			app.logger.Error("error on database close", slog.String("err", err.Error()))
+			logger.Error("error on database close", slog.String("err", err.Error()))
 		}
 	}()
 
@@ -132,12 +122,12 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 
 	cache := cacher.New[string](ctx, logger, m, "cache", configuration.Cache.Timeout)
 
-	httpClient, err := http.NewHTTPClient(app.config, app.logger, debugMode)
+	httpClient, err := http.NewHTTPClient(configuration, logger, debugMode)
 	if err != nil {
 		return err
 	}
 
-	app.logger.Info("Starting server",
+	logger.Info("Starting server",
 		slog.String("host", configuration.Server.Listen),
 		slog.Duration("gracefultimeout", configuration.Server.GracefulTimeout),
 		slog.Duration("timeout", configuration.Timeout),
@@ -145,8 +135,8 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 	)
 
 	options := []server.OptionsServerFunc{
-		server.WithLogger(app.logger),
-		server.WithConfig(app.config),
+		server.WithLogger(logger),
+		server.WithConfig(configuration),
 		server.WithDB(db),
 		server.WithNotify(notify),
 		server.WithDebug(debugMode),
@@ -176,7 +166,7 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 	}
 
 	if configuration.Server.TLS.PublicKey != "" && configuration.Server.TLS.PrivateKey != "" {
-		tlsConfig, err := app.setupTLSConfig()
+		tlsConfig, err := setupTLSConfig(logger, configuration)
 		if err != nil {
 			return err
 		}
@@ -184,7 +174,7 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 
 		go func() {
 			if err := srv.ListenAndServeTLS(configuration.Server.TLS.PublicKey, configuration.Server.TLS.PrivateKey); err != nil && !errors.Is(err, nethttp.ErrServerClosed) {
-				app.logger.Error("error on listenandserveTLS", slog.String("err", err.Error()))
+				logger.Error("error on listenandserveTLS", slog.String("err", err.Error()))
 				// emit signal to kill server
 				cancel()
 			}
@@ -192,19 +182,19 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 	} else {
 		go func() {
 			if err := srv.ListenAndServe(); err != nil && !errors.Is(err, nethttp.ErrServerClosed) {
-				app.logger.Error("error on listenandserve", slog.String("err", err.Error()))
+				logger.Error("error on listenandserve", slog.String("err", err.Error()))
 				// emit signal to kill server
 				cancel()
 			}
 		}()
 	}
 
-	app.logger.Info("Starting pprof server",
-		slog.String("host", app.config.Server.PprofListen),
+	logger.Info("Starting pprof server",
+		slog.String("host", configuration.Server.PprofListen),
 	)
 
 	pprofSrv := &nethttp.Server{
-		Addr: app.config.Server.PprofListen,
+		Addr: configuration.Server.PprofListen,
 	}
 	go func() {
 		pprofMux := nethttp.NewServeMux()
@@ -241,15 +231,15 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 
 	// wait for a signal
 	<-ctx.Done()
-	app.logger.Info("received shutdown signal")
+	logger.Info("received shutdown signal")
 	// create a new context for shutdown
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), configuration.Server.GracefulTimeout)
 	defer cancel()
 	if err := srv.Shutdown(shutdownCtx); err != nil {
-		app.logger.Error("error on srv shutdown", slog.String("err", err.Error()))
+		logger.Error("error on srv shutdown", slog.String("err", err.Error()))
 	}
 	if err := pprofSrv.Shutdown(shutdownCtx); err != nil {
-		app.logger.Error("error on pprofsrv shutdown", slog.String("err", err.Error()))
+		logger.Error("error on pprofsrv shutdown", slog.String("err", err.Error()))
 	}
 	if err := metricsSrv.Shutdown(shutdownCtx); err != nil {
 		logger.Error("error on metricsSrv shutdown", slog.String("err", err.Error()))

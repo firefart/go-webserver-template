@@ -7,13 +7,15 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+
+	"github.com/firefart/go-webserver-template/internal/config"
 )
 
-func (app *application) setupTLSConfig() (*tls.Config, error) {
+func setupTLSConfig(logger *slog.Logger, config config.Configuration) (*tls.Config, error) {
 	tlsConfig := &tls.Config{MinVersion: tls.VersionTLS13}
 
-	if app.config.Server.TLS.MTLSRootCA != "" {
-		caCertPEM, err := os.ReadFile(app.config.Server.TLS.MTLSRootCA)
+	if config.Server.TLS.MTLSRootCA != "" {
+		caCertPEM, err := os.ReadFile(config.Server.TLS.MTLSRootCA)
 		if err != nil {
 			return nil, err
 		}
@@ -27,7 +29,7 @@ func (app *application) setupTLSConfig() (*tls.Config, error) {
 		tlsConfig.ClientAuth = tls.RequireAndVerifyClientCert
 	}
 
-	if app.config.Server.TLS.MTLSCertSubject != "" {
+	if config.Server.TLS.MTLSCertSubject != "" {
 		tlsConfig.VerifyPeerCertificate = func(_ [][]byte, verifiedChains [][]*x509.Certificate) error {
 			certs := make(map[string]bool)
 			// only loop over verified chains (matches the rootca)
@@ -43,14 +45,14 @@ func (app *application) setupTLSConfig() (*tls.Config, error) {
 					certs[leafSubject] = true
 				}
 				for _, y := range x {
-					app.logger.Debug("Got certificate", slog.String("subject", y.Subject.String()), slog.Int64("serial", y.SerialNumber.Int64()))
+					logger.Debug("Got certificate", slog.String("subject", y.Subject.String()), slog.Int64("serial", y.SerialNumber.Int64()))
 				}
 			}
 
 			var subjects []string
 			for subject := range certs {
-				if subject == app.config.Server.TLS.MTLSCertSubject {
-					app.logger.Debug("Allowing certificate", slog.String("subject", subject))
+				if subject == config.Server.TLS.MTLSCertSubject {
+					logger.Debug("Allowing certificate", slog.String("subject", subject))
 					// allow
 					return nil
 				}
