@@ -72,7 +72,7 @@ tasks:
 
   tailwind:
     cmds:
-      - npx tailwindcss -i ./internal/server/assets/web/css/input.css -o ./internal/server/assets/web/css/style.min.css --minify
+      - npx @tailwindcss/cli -i ./internal/server/assets/web/css/input.css -o ./internal/server/assets/web/css/style.min.css --minify
 
   lint:
     cmds:
