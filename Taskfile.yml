@@ -32,7 +32,7 @@ tasks:
       - go install github.com/pressly/goose/v3/cmd/goose@latest
       - go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
       - go install mvdan.cc/gofumpt@latest
-      - npm i -D tailwindcss@latest
+      - npm i -D tailwindcss@latest @tailwindcss/cli
       - npm i -D @tailwindcss/typography
       - npm i -D daisyui@latest
       - npm audit fix
