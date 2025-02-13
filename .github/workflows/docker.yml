@@ -12,6 +12,7 @@ jobs:
   build_docker_images:
     if: ${{ false }} # disable for now, also replace __PACKAGENAME__ at the bottom when enabling
 
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     permissions:
       contents: read

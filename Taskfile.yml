@@ -9,60 +9,57 @@ tasks:
       - go mod tidy -v
 
   update:
-    deps: [ htmx-update, generate ]
+    deps: [htmx-update, generate]
     cmds:
       - go get -u
+      - go get -u tool
       - go mod tidy -v
 
   generate:
-    deps: [ sqlc, templ, tailwind ]
+    deps: [sqlc, templ, tailwind]
 
   sqlc:
     cmds:
-      - sqlc generate
+      - go tool sqlc generate
 
   templ:
     cmds:
-      - templ generate
+      - go tool templ generate
 
   setup:
     cmds:
-      - go install github.com/a-h/templ/cmd/templ@latest
       - go install github.com/air-verse/air@latest
-      - go install github.com/pressly/goose/v3/cmd/goose@latest
-      - go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
-      - go install mvdan.cc/gofumpt@latest
       - npm i -D tailwindcss@latest @tailwindcss/cli
       - npm i -D @tailwindcss/typography
       - npm i -D daisyui@latest
       - npm audit fix
 
   build:
-    aliases: [ default ]
-    deps: [ deps, generate ]
+    aliases: [default]
+    deps: [deps, generate]
     env:
       CGO_ENABLED: 0
     cmds:
       - go fmt ./...
-      - gofumpt -l -w .
-      - templ fmt .
+      - go tool gofumpt -l -w .
+      - go tool templ fmt .
       - go vet ./...
       - go build -o {{.PROGRAM}}
 
   test:
-    deps: [ deps, generate ]
+    deps: [deps, generate]
     env:
       CGO_ENABLED: 1 # required by -race
     cmds:
       - go test -race -cover ./...
 
   run:
-    deps: [ build ]
+    deps: [build]
     cmds:
       - ./{{.PROGRAM}} -debug -config config.json
 
   configcheck:
-    deps: [ build ]
+    deps: [build]
     cmds:
       - ./{{.PROGRAM}} -configcheck -config config.json
 

@@ -7,6 +7,7 @@ on:
 
 jobs:
   update:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -46,7 +47,7 @@ jobs:
           if [ $exit_status -eq 0 ]; then
             echo "nothing has changed"
           else
-            git add go.mod go.sum internal/server/assets/web/scripts/htmx.min.js internal/server/templates/*_templ.go internal/server/assets/web/css/style.min.css internal/database/sqlc/*.go
+            git add .
             git commit -m "auto update from github actions"
             git push origin main
           fi

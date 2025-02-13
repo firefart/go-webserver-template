@@ -1,8 +1,6 @@
 package database_test
 
 import (
-	"context"
-	"io"
 	"log"
 	"log/slog"
 	"os"
@@ -33,8 +31,7 @@ func TestGetAllDummy(t *testing.T) {
 			Filename: file.Name(),
 		},
 	}
-	ctx := context.Background()
-	db, err := database.New(ctx, configuration, slog.New(slog.NewTextHandler(io.Discard, nil)), false)
+	db, err := database.New(t.Context(), configuration, slog.New(slog.DiscardHandler), false)
 	require.Nil(t, err)
 	defer func(db *database.Database, timeout time.Duration) {
 		err := db.Close(timeout)
@@ -43,11 +40,11 @@ func TestGetAllDummy(t *testing.T) {
 		}
 	}(db, 1*time.Second)
 
-	id, err := db.InsertDummy(ctx, "Test")
+	id, err := db.InsertDummy(t.Context(), "Test")
 	require.Nil(t, err)
 	require.Positive(t, id)
 
-	ids, err := db.GetAllDummy(ctx)
+	ids, err := db.GetAllDummy(t.Context())
 	require.Nil(t, err)
 	require.Len(t, ids, 1)
 	require.Equal(t, id, ids[0])

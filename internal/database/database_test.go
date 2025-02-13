@@ -1,10 +1,8 @@
 package database
 
 import (
-	"context"
 	"database/sql"
 	"errors"
-	"io"
 	"io/fs"
 	"log"
 	"log/slog"
@@ -39,7 +37,7 @@ func TestNew(t *testing.T) {
 			Filename: file.Name(),
 		},
 	}
-	db, err := New(context.Background(), configuration, slog.New(slog.NewTextHandler(io.Discard, nil)), false)
+	db, err := New(t.Context(), configuration, slog.New(slog.DiscardHandler), false)
 	require.Nil(t, err)
 	err = db.Close(1 * time.Second)
 	require.Nil(t, err)
@@ -57,9 +55,7 @@ func TestMigrations(t *testing.T) {
 	prov, err := goose.NewProvider("sqlite3", db, migrationFS)
 	require.Nil(t, err, "could not create goose provider")
 
-	ctx := context.Background()
-
-	result, err := prov.Up(ctx)
+	result, err := prov.Up(t.Context())
 	if err != nil {
 		var partialError *goose.PartialError
 		switch {
@@ -79,7 +75,7 @@ func TestMigrations(t *testing.T) {
 
 	require.Positive(t, len(result))
 
-	result, err = prov.DownTo(ctx, 0)
+	result, err = prov.DownTo(t.Context(), 0)
 	if err != nil {
 		var partialError *goose.PartialError
 		switch {

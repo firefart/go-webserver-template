@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"io"
 	"log/slog"
 	"net/http"
 
@@ -32,7 +31,7 @@ func SecretKeyHeader(config SecretKeyHeaderConfig) echo.MiddlewareFunc {
 		config.Skipper = middleware.DefaultSkipper
 	}
 	if config.Logger == nil {
-		config.Logger = slog.New(slog.NewTextHandler(io.Discard, nil))
+		config.Logger = slog.New(slog.DiscardHandler)
 	}
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {

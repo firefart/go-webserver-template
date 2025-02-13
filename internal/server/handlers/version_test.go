@@ -1,7 +1,6 @@
 package handlers_test
 
 import (
-	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,7 +13,6 @@ import (
 )
 
 func TestVersion(t *testing.T) {
-	ctx := context.Background()
 	configuration := config.Configuration{
 		Server: config.Server{
 			SecretKeyHeaderName:  "X-Secret-Key",
@@ -22,7 +20,7 @@ func TestVersion(t *testing.T) {
 		},
 	}
 
-	e := server.NewServer(ctx, server.WithConfig(configuration))
+	e := server.NewServer(t.Context(), server.WithConfig(configuration))
 	x, ok := e.(*echo.Echo)
 	require.True(t, ok)
 

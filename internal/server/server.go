@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"embed"
-	"io"
 	"log/slog"
 	nethttp "net/http"
 
@@ -38,7 +37,7 @@ var fsAssets embed.FS
 
 func NewServer(ctx context.Context, opts ...OptionsServerFunc) nethttp.Handler {
 	s := server{
-		logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
+		logger: slog.New(slog.DiscardHandler),
 		debug:  false,
 	}
 

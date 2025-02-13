@@ -1,8 +1,6 @@
 package handlers_test
 
 import (
-	"context"
-	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -18,7 +16,6 @@ import (
 )
 
 func TestIndexMock(t *testing.T) {
-	ctx := context.Background()
 	db := database.NewMockDB()
 	configuration := config.Configuration{
 		Server: config.Server{
@@ -26,7 +23,7 @@ func TestIndexMock(t *testing.T) {
 			SecretKeyHeaderValue: "SECRET",
 		},
 	}
-	e := server.NewServer(ctx, server.WithDB(db), server.WithConfig(configuration))
+	e := server.NewServer(t.Context(), server.WithDB(db), server.WithConfig(configuration))
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 	x, ok := e.(*echo.Echo)
@@ -38,8 +35,7 @@ func TestIndexMock(t *testing.T) {
 }
 
 func TestIndex(t *testing.T) {
-	ctx := context.Background()
-	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	logger := slog.New(slog.DiscardHandler)
 
 	file, err := os.CreateTemp("", "*.sqlite")
 	if err != nil {
@@ -62,10 +58,10 @@ func TestIndex(t *testing.T) {
 		},
 	}
 
-	db, err := database.New(ctx, configuration, logger, false)
+	db, err := database.New(t.Context(), configuration, logger, false)
 	require.Nil(t, err)
 
-	e := server.NewServer(ctx, server.WithConfig(configuration), server.WithDB(db))
+	e := server.NewServer(t.Context(), server.WithConfig(configuration), server.WithDB(db))
 	x, ok := e.(*echo.Echo)
 	require.True(t, ok)
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
