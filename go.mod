@@ -5,7 +5,7 @@ go 1.24
 require (
 	github.com/a-h/templ v0.3.833
 	github.com/charmbracelet/log v0.4.0
-	github.com/go-playground/validator/v10 v10.24.0
+	github.com/go-playground/validator/v10 v10.25.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/knadh/koanf/parsers/json v0.1.0
 	github.com/knadh/koanf/providers/file v1.1.2
