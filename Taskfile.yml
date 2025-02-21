@@ -28,7 +28,6 @@ tasks:
 
   setup:
     cmds:
-      - go install github.com/air-verse/air@latest
       - npm i -D tailwindcss@latest @tailwindcss/cli
       - npm i -D @tailwindcss/typography
       - npm i -D daisyui@latest
@@ -57,6 +56,11 @@ tasks:
     deps: [build]
     cmds:
       - ./{{.PROGRAM}} -debug -config config.json
+
+  dev:
+    deps: [build]
+    cmds:
+      - go tool air
 
   configcheck:
     deps: [build]
