@@ -1,0 +1,13 @@
+name: Go
+on: [push, pull_request]
+jobs:
+  yamllint:
+    name: yamllint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: reviewdog/action-yamllint@v1
+        with:
+          fail_level: any
+          reporter: github-pr-review
+          yamllint_flags: '-d "{extends: default, rules: {truthy: disable}}" .'
