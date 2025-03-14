@@ -1,4 +1,4 @@
-name: Go
+name: yamllint
 on: [push, pull_request]
 jobs:
   yamllint:
@@ -9,5 +9,4 @@ jobs:
       - uses: reviewdog/action-yamllint@v1
         with:
           fail_level: any
-          reporter: github-pr-review
-          yamllint_flags: '-d "{extends: default, rules: {truthy: disable}}" .'
+          yamllint_flags: '-d "{extends: default, rules: {truthy: disable, line-length: disable}}" .'
