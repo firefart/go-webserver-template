@@ -3,7 +3,7 @@ module github.com/firefart/go-webserver-template
 go 1.24
 
 require (
-	github.com/a-h/templ v0.3.833
+	github.com/a-h/templ v0.3.856
 	github.com/charmbracelet/log v0.4.1
 	github.com/go-playground/validator/v10 v10.25.0
 	github.com/hashicorp/go-multierror v1.1.1
@@ -29,16 +29,14 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/ClickHouse/ch-go v0.65.1 // indirect
 	github.com/ClickHouse/clickhouse-go/v2 v2.33.1 // indirect
-	github.com/PuerkitoBio/goquery v1.10.2 // indirect
 	github.com/a-h/parse v0.0.0-20250122154542-74294addb73e // indirect
 	github.com/air-verse/air v1.61.7 // indirect
 	github.com/andybalholm/brotli v1.1.1 // indirect
-	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/atc0005/go-teams-notify/v2 v2.13.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bep/godartsass/v2 v2.4.0 // indirect
+	github.com/bep/godartsass/v2 v2.4.1 // indirect
 	github.com/bep/golibsass v1.2.0 // indirect
 	github.com/bwmarrin/discordgo v0.28.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
@@ -49,7 +47,6 @@ require (
 	github.com/charmbracelet/x/cellbuf v0.0.13 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/cli/browser v1.3.0 // indirect
-	github.com/cli/safeexec v1.0.1 // indirect
 	github.com/coder/websocket v1.8.13 // indirect
 	github.com/creack/pty v1.1.24 // indirect
 	github.com/cubicdaiya/gonp v1.0.4 // indirect
@@ -114,7 +111,7 @@ require (
 	github.com/pingcap/errors v0.11.5-0.20240311024730-e056997136bb // indirect
 	github.com/pingcap/failpoint v0.0.0-20240528011301-b51a646c7c86 // indirect
 	github.com/pingcap/log v1.1.0 // indirect
-	github.com/pingcap/tidb/pkg/parser v0.0.0-20250321121322-0929f3353f4e // indirect
+	github.com/pingcap/tidb/pkg/parser v0.0.0-20250323074040-ca8a0707ab06 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
@@ -170,7 +167,7 @@ require (
 	howett.net/plist v1.0.1 // indirect
 	modernc.org/libc v1.61.13 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
-	modernc.org/memory v1.9.0 // indirect
+	modernc.org/memory v1.9.1 // indirect
 	mvdan.cc/gofumpt v0.7.0 // indirect
 )
 
