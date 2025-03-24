@@ -1,5 +1,11 @@
 name: yamllint
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - "**.yml"
+      - "**.yaml"
+  pull_request:
+  workflow_dispatch:
 jobs:
   yamllint:
     name: yamllint

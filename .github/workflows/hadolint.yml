@@ -1,5 +1,10 @@
 name: Hadolint
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - "**/Dockerfile"
+  pull_request:
+  workflow_dispatch:
 jobs:
   hadolint:
     name: hadolint
