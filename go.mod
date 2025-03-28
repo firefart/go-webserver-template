@@ -14,13 +14,13 @@ require (
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/mattn/go-isatty v0.0.20
 	github.com/nikoksr/notify v1.3.0
-	github.com/pressly/goose/v3 v3.24.1
+	github.com/pressly/goose/v3 v3.24.2
 	github.com/prometheus/client_golang v1.21.1
 	github.com/stretchr/testify v1.10.0
 	github.com/wneessen/go-mail v0.6.2
 	go.uber.org/automaxprocs v1.6.0
-	golang.org/x/net v0.37.0
-	modernc.org/sqlite v1.36.2
+	golang.org/x/net v0.38.0
+	modernc.org/sqlite v1.36.3
 )
 
 require (
@@ -111,7 +111,7 @@ require (
 	github.com/pingcap/errors v0.11.5-0.20240311024730-e056997136bb // indirect
 	github.com/pingcap/failpoint v0.0.0-20240528011301-b51a646c7c86 // indirect
 	github.com/pingcap/log v1.1.0 // indirect
-	github.com/pingcap/tidb/pkg/parser v0.0.0-20250327090126-979f142e5031 // indirect
+	github.com/pingcap/tidb/pkg/parser v0.0.0-20250328091810-37a2bf4e891e // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
