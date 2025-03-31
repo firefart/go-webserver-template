@@ -12,7 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: reviewdog/action-yamllint@v1
+      - uses: karancode/yamllint-github-action@master
         with:
-          fail_level: any
-          yamllint_flags: '-d "{extends: default, rules: {truthy: disable, line-length: disable}}" .'
+          # fail on warnings and errors
+          yamllint_strict: true
+          yamllint_config_filepath: ".yamllint.yml"
