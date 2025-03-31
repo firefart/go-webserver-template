@@ -10,7 +10,7 @@ on:
 permissions:
   contents: read
   pull-requests: read
-  checks: write # needed for annotations
+  checks: write
 
 jobs:
   golangci:
