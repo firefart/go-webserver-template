@@ -26,7 +26,7 @@ func TestSecretKeyHeader(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	err := mw(handler)(c)
-	require.Nil(t, err)
+	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, rec.Code)
 	require.Equal(t, "secret content", rec.Body.String())
 
@@ -35,9 +35,9 @@ func TestSecretKeyHeader(t *testing.T) {
 	rec = httptest.NewRecorder()
 	c = e.NewContext(req, rec)
 	err = mw(handler)(c)
-	require.Nil(t, err)
+	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, rec.Code)
-	require.Len(t, rec.Body.String(), 0)
+	require.Empty(t, rec.Body.String())
 
 	// wrong header value
 	req = httptest.NewRequest(http.MethodGet, "/", nil)
@@ -45,9 +45,9 @@ func TestSecretKeyHeader(t *testing.T) {
 	rec = httptest.NewRecorder()
 	c = e.NewContext(req, rec)
 	err = mw(handler)(c)
-	require.Nil(t, err)
+	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, rec.Code)
-	require.Len(t, rec.Body.String(), 0)
+	require.Empty(t, rec.Body.String())
 
 	// debug should skip checks
 	mw = SecretKeyHeader(SecretKeyHeaderConfig{
@@ -62,7 +62,7 @@ func TestSecretKeyHeader(t *testing.T) {
 	rec = httptest.NewRecorder()
 	c = e.NewContext(req, rec)
 	err = mw(handler)(c)
-	require.Nil(t, err)
+	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, rec.Code)
 	require.Equal(t, "secret content", rec.Body.String())
 

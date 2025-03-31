@@ -1,7 +1,6 @@
 package database_test
 
 import (
-	"log"
 	"log/slog"
 	"os"
 	"testing"
@@ -15,15 +14,11 @@ import (
 func TestGetAllDummy(t *testing.T) {
 	t.Parallel()
 
-	file, err := os.CreateTemp("", "*.sqlite")
-	if err != nil {
-		log.Fatal(err)
-	}
+	file, err := os.CreateTemp(t.TempDir(), "*.sqlite")
+	require.NoError(t, err)
 	defer func(name string) {
 		err := os.Remove(name)
-		if err != nil {
-			require.Nil(t, err)
-		}
+		require.NoError(t, err)
 	}(file.Name())
 
 	configuration := config.Configuration{
@@ -32,20 +27,18 @@ func TestGetAllDummy(t *testing.T) {
 		},
 	}
 	db, err := database.New(t.Context(), configuration, slog.New(slog.DiscardHandler), false)
-	require.Nil(t, err)
+	require.NoError(t, err)
 	defer func(db *database.Database, timeout time.Duration) {
 		err := db.Close(timeout)
-		if err != nil {
-			require.Nil(t, err)
-		}
+		require.NoError(t, err)
 	}(db, 1*time.Second)
 
 	id, err := db.InsertDummy(t.Context(), "Test")
-	require.Nil(t, err)
+	require.NoError(t, err)
 	require.Positive(t, id)
 
 	ids, err := db.GetAllDummy(t.Context())
-	require.Nil(t, err)
+	require.NoError(t, err)
 	require.Len(t, ids, 1)
 	require.Equal(t, id, ids[0])
 }

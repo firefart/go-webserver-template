@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/labstack/echo/v4"
 )
@@ -13,5 +13,5 @@ func NewNotificationHandler() *NotificationHandler {
 }
 
 func (*NotificationHandler) EchoHandler(_ echo.Context) error {
-	return fmt.Errorf("test")
+	return errors.New("test")
 }

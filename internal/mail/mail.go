@@ -56,17 +56,18 @@ func New(config config.Configuration, logger *slog.Logger) (*Mail, error) {
 	}
 	if config.Mail.SkipTLS {
 		options = append(options, gomail.WithTLSConfig(&tls.Config{
-			InsecureSkipVerify: true,
+			InsecureSkipVerify: true, // nolint: gosec
 		}))
 	}
 
 	// use either tls, starttls, or starttls with fallback to plaintext
-	if config.Mail.TLS {
+	switch {
+	case config.Mail.TLS:
 		options = append(options, gomail.WithSSL())
-	} else if config.Mail.StartTLS {
-		options = append(options, gomail.WithTLSPortPolicy(gomail.TLSMandatory))
-	} else {
-		options = append(options, gomail.WithTLSPortPolicy(gomail.TLSOpportunistic))
+	case config.Mail.StartTLS:
+		options = append(options, gomail.WithTLSPolicy(gomail.TLSMandatory))
+	default:
+		options = append(options, gomail.WithTLSPolicy(gomail.TLSOpportunistic))
 	}
 
 	mailer, err := gomail.NewClient(config.Mail.Server, options...)
@@ -113,7 +114,7 @@ func (m *Mail) SendMultipartEmail(ctx context.Context, subject, textBody, htmlBo
 
 func (m *Mail) send(ctx context.Context, to string, subject, textContent, htmlContent string) error {
 	if textContent == "" && htmlContent == "" {
-		return fmt.Errorf("need a content to send email")
+		return errors.New("need a content to send email")
 	}
 
 	m.logger.Debug("sending email", slog.String("subject", subject), slog.String("to", to), slog.String("content-text", textContent), slog.String("html-content", htmlContent))

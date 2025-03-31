@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -164,9 +165,12 @@ func GetConfig(f string) (Configuration, error) {
 			return Configuration{}, err
 		}
 
+		var valErr validator.ValidationErrors
+		if ok := errors.As(err, &valErr); !ok {
+			return Configuration{}, fmt.Errorf("could not cast err to ValidationErrors: %w", err)
+		}
 		var resultErr error
-		for _, err := range err.(validator.ValidationErrors) {
-			// TODO: create new error with own message
+		for _, err := range valErr {
 			resultErr = multierror.Append(resultErr, err)
 		}
 		return Configuration{}, resultErr

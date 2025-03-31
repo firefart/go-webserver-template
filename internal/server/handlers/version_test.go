@@ -27,7 +27,7 @@ func TestVersion(t *testing.T) {
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/version", nil)
 	cont := x.NewContext(req, rec)
-	require.Nil(t, handlers.NewVersionHandler().EchoHandler(cont))
+	require.NoError(t, handlers.NewVersionHandler().EchoHandler(cont))
 	require.Equal(t, http.StatusOK, rec.Code)
 	require.Greater(t, len(rec.Body.String()), 10)
 }

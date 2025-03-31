@@ -11,14 +11,14 @@ func NewMetrics(reg prometheus.Registerer) (*Metrics, error) {
 	m := &Metrics{
 		CacheHits: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "cache_hits",
+				Name: "cache_hits_total",
 				Help: "Cache hits per cache",
 			},
 			[]string{"cache_name"},
 		),
 		CacheMisses: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "cache_misses",
+				Name: "cache_misses_total",
 				Help: "Cache misses per cache",
 			},
 			[]string{"cache_name"},

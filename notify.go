@@ -36,17 +36,19 @@ func setupNotifications(configuration config.Configuration, logger *slog.Logger)
 		if configuration.Notifications.Discord.BotToken != "" || configuration.Notifications.Discord.OAuthToken != "" {
 			logger.Info("Notifications: using discord")
 			discordService := discord.New()
-			if configuration.Notifications.Discord.BotToken != "" {
+			switch {
+			case configuration.Notifications.Discord.BotToken != "":
 				if err := discordService.AuthenticateWithBotToken(configuration.Notifications.Discord.BotToken); err != nil {
 					return nil, fmt.Errorf("discord bot token setup: %w", err)
 				}
-			} else if configuration.Notifications.Discord.OAuthToken != "" {
+			case configuration.Notifications.Discord.OAuthToken != "":
 				if err := discordService.AuthenticateWithOAuth2Token(configuration.Notifications.Discord.OAuthToken); err != nil {
 					return nil, fmt.Errorf("discord oauth token setup: %w", err)
 				}
-			} else {
+			default:
 				panic("logic error")
 			}
+
 			discordService.AddReceivers(configuration.Notifications.Discord.ChannelIDs...)
 			services = append(services, discordService)
 		}

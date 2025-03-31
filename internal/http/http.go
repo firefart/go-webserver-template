@@ -2,6 +2,7 @@ package http
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -19,8 +20,11 @@ type Client struct {
 
 func NewHTTPClient(config config.Configuration, logger *slog.Logger, debugMode bool) (*Client, error) {
 	// use default transport so proxy is respected
-	tr := http.DefaultTransport.(*http.Transport)
-	tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	tr, ok := http.DefaultTransport.(*http.Transport)
+	if !ok {
+		return nil, errors.New("failed to cast default transport to http.Transport")
+	}
+	tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true} // nolint:gosec
 	if config.Proxy != nil && config.Proxy.URL != "" {
 		proxy, err := newProxy(*config.Proxy)
 		if err != nil {

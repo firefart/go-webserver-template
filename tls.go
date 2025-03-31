@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -22,7 +23,7 @@ func setupTLSConfig(logger *slog.Logger, config config.Configuration) (*tls.Conf
 		roots := x509.NewCertPool()
 		ok := roots.AppendCertsFromPEM(caCertPEM)
 		if !ok {
-			return nil, fmt.Errorf("failed to parse root certificate")
+			return nil, errors.New("failed to parse root certificate")
 		}
 
 		tlsConfig.ClientCAs = roots

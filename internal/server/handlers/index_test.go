@@ -29,7 +29,7 @@ func TestIndexMock(t *testing.T) {
 	x, ok := e.(*echo.Echo)
 	require.True(t, ok)
 	cont := x.NewContext(req, rec)
-	require.Nil(t, handlers.NewIndexHandler(true).EchoHandler(cont))
+	require.NoError(t, handlers.NewIndexHandler(true).EchoHandler(cont))
 	require.Equal(t, http.StatusOK, rec.Code)
 	require.Greater(t, len(rec.Body.String()), 10)
 }
@@ -37,15 +37,11 @@ func TestIndexMock(t *testing.T) {
 func TestIndex(t *testing.T) {
 	logger := slog.New(slog.DiscardHandler)
 
-	file, err := os.CreateTemp("", "*.sqlite")
-	if err != nil {
-		t.Fatal(err)
-	}
+	file, err := os.CreateTemp(t.TempDir(), "*.sqlite")
+	require.NoError(t, err)
 	defer func(name string) {
 		err := os.Remove(name)
-		if err != nil {
-			require.Nil(t, err)
-		}
+		require.NoError(t, err)
 	}(file.Name())
 
 	configuration := config.Configuration{
@@ -59,7 +55,7 @@ func TestIndex(t *testing.T) {
 	}
 
 	db, err := database.New(t.Context(), configuration, logger, false)
-	require.Nil(t, err)
+	require.NoError(t, err)
 
 	e := server.NewServer(t.Context(), server.WithConfig(configuration), server.WithDB(db))
 	x, ok := e.(*echo.Echo)
@@ -67,7 +63,7 @@ func TestIndex(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 	cont := x.NewContext(req, rec)
-	require.Nil(t, handlers.NewIndexHandler(true).EchoHandler(cont))
+	require.NoError(t, handlers.NewIndexHandler(true).EchoHandler(cont))
 	require.Equal(t, http.StatusOK, rec.Code)
 	require.Greater(t, len(rec.Body.String()), 10)
 }

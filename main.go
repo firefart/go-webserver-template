@@ -24,17 +24,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/automaxprocs/maxprocs"
 
-	_ "net/http/pprof"
+	_ "net/http/pprof" // nolint: gosec
 )
 
-func init() {
-	// added in init to prevent the forced logline
+func main() {
 	if _, err := maxprocs.Set(); err != nil {
 		panic(fmt.Sprintf("Error on gomaxprocs: %v\n", err))
 	}
-}
 
-func main() {
 	var debugMode bool
 	var configFilename string
 	var jsonOutput bool
@@ -50,10 +47,10 @@ func main() {
 	if version {
 		buildInfo, ok := debug.ReadBuildInfo()
 		if !ok {
-			fmt.Println("Unable to determine version information")
+			fmt.Println("Unable to determine version information") // nolint: forbidigo
 			os.Exit(1)
 		}
-		fmt.Printf("%s", buildInfo)
+		fmt.Printf("%s", buildInfo) // nolint: forbidigo
 		os.Exit(0)
 	}
 
@@ -91,7 +88,7 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 	defer cancel()
 
 	if configFilename == "" {
-		return fmt.Errorf("please provide a config file")
+		return errors.New("please provide a config file")
 	}
 
 	configuration, err := config.GetConfig(configFilename)
@@ -193,7 +190,7 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 		slog.String("host", configuration.Server.PprofListen),
 	)
 
-	pprofSrv := &nethttp.Server{
+	pprofSrv := &nethttp.Server{ // nolint: gosec
 		Addr: configuration.Server.PprofListen,
 	}
 	go func() {
@@ -216,7 +213,7 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 		slog.String("host", configuration.Server.MetricsListen),
 	)
 
-	metricsSrv := &nethttp.Server{
+	metricsSrv := &nethttp.Server{ // nolint: gosec
 		Addr: configuration.Server.MetricsListen,
 	}
 	go func() {

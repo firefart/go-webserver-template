@@ -33,7 +33,7 @@ func New(ctx context.Context, configuration config.Configuration, logger *slog.L
 	if strings.ToLower(configuration.Database.Filename) == ":memory:" {
 		// not possible because of the two db instances, with in memory they
 		// would be separate instances
-		return nil, fmt.Errorf("in memory databases are not supported")
+		return nil, errors.New("in memory databases are not supported")
 	}
 
 	reader, err := newDatabase(ctx, configuration, logger, debug, true)

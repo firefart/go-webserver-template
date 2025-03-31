@@ -18,5 +18,5 @@ func Render(ctx echo.Context, statusCode int, t templ.Component) error {
 
 // nolint:unused
 func isHTMX(c echo.Context) bool {
-	return c.Request().Header.Get("HX-Request") == "true"
+	return c.Request().Header.Get("Hx-Request") == "true"
 }
