@@ -20,7 +20,7 @@ require (
 	github.com/wneessen/go-mail v0.6.2
 	go.uber.org/automaxprocs v1.6.0
 	golang.org/x/net v0.38.0
-	modernc.org/sqlite v1.36.3
+	modernc.org/sqlite v1.37.0
 )
 
 require (
