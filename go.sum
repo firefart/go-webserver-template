@@ -192,8 +192,8 @@ github.com/gohugoio/hashstructure v0.5.0 h1:G2fjSBU36RdwEJBWJ+919ERvOVqAg9tfcYp4
 github.com/gohugoio/hashstructure v0.5.0/go.mod h1:Ser0TniXuu/eauYmrwM4o64EBvySxNzITEOLlm4igec=
 github.com/gohugoio/httpcache v0.7.0 h1:ukPnn04Rgvx48JIinZvZetBfHaWE7I01JR2Q2RrQ3Vs=
 github.com/gohugoio/httpcache v0.7.0/go.mod h1:fMlPrdY/vVJhAriLZnrF5QpN3BNAcoBClgAyQd+lGFI=
-github.com/gohugoio/hugo v0.146.4 h1:wV9BPs40xWmPxI5oklsDec+KcW1nG1KPtsyHBnfaD2k=
-github.com/gohugoio/hugo v0.146.4/go.mod h1:WsWhL6F5z0/ER9LgREuNp96eovssVKVCEDHgkibceuU=
+github.com/gohugoio/hugo v0.146.5 h1:HY+B/qmNG7qSxwl+yq9hdWnVmKQ/1JcNKeRk4BPnhO0=
+github.com/gohugoio/hugo v0.146.5/go.mod h1:4cfcrxxrcT3pBo3sQ7GDpihSAVZir0T9yMts0B1DzBY=
 github.com/gohugoio/hugo-goldmark-extensions/extras v0.3.0 h1:gj49kTR5Z4Hnm0ZaQrgPVazL3DUkppw+x6XhHCmh+Wk=
 github.com/gohugoio/hugo-goldmark-extensions/extras v0.3.0/go.mod h1:IMMj7xiUbLt1YNJ6m7AM4cnsX4cFnnfkleO/lBHGzUg=
 github.com/gohugoio/hugo-goldmark-extensions/passthrough v0.3.1 h1:nUzXfRTszLliZuN0JTKeunXTRaiFX6ksaWP0puLLYAY=
@@ -388,8 +388,8 @@ github.com/pingcap/failpoint v0.0.0-20240528011301-b51a646c7c86 h1:tdMsjOqUR7YXH
 github.com/pingcap/failpoint v0.0.0-20240528011301-b51a646c7c86/go.mod h1:exzhVYca3WRtd6gclGNErRWb1qEgff3LYta0LvRmON4=
 github.com/pingcap/log v1.1.0 h1:ELiPxACz7vdo1qAvvaWJg1NrYFoY6gqAh/+Uo6aXdD8=
 github.com/pingcap/log v1.1.0/go.mod h1:DWQW5jICDR7UJh4HtxXSM20Churx4CQL0fwL/SoOSA4=
-github.com/pingcap/tidb/pkg/parser v0.0.0-20250415112030-5334c589df96 h1:5imQT4l9/Oyq/LzwlbwzhEM4C/jf17R+QUgx+Ed8XQw=
-github.com/pingcap/tidb/pkg/parser v0.0.0-20250415112030-5334c589df96/go.mod h1:+8feuexTKcXHZF/dkDfvCwEyBAmgb4paFc3/WeYV2eE=
+github.com/pingcap/tidb/pkg/parser v0.0.0-20250416102243-2c103b46a41d h1:g5bpRZJe8LtsROBooU4xDKdOdCPcyKOCL5d0esaiz2k=
+github.com/pingcap/tidb/pkg/parser v0.0.0-20250416102243-2c103b46a41d/go.mod h1:+8feuexTKcXHZF/dkDfvCwEyBAmgb4paFc3/WeYV2eE=
 github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c h1:+mdjkGKdHQG3305AYmdv1U2eRNDiU2ErMBj1gwrq8eQ=
 github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c/go.mod h1:7rwL4CYBLnjLxUqIJNnCWiEdr3bn6IUYi15bNlnbCCU=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
@@ -503,8 +503,8 @@ github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d/go.mod h1:rHwXgn7Jul
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
-github.com/yuin/goldmark v1.7.8 h1:iERMLn0/QJeHFhxSt3p6PeN9mGnvIKSpG9YYorDMnic=
-github.com/yuin/goldmark v1.7.8/go.mod h1:uzxRWxtg69N339t3louHJ7+O03ezfj6PlliRlaOzY1E=
+github.com/yuin/goldmark v1.7.9 h1:rVSeT+f7/lAM+bJHVm5YHGwNrnd40i1Ch2DEocEjHQ0=
+github.com/yuin/goldmark v1.7.9/go.mod h1:ip/1k0VRfGynBgxOz0yCqHrbZXhcjxyuS66Brc7iBKg=
 github.com/yuin/goldmark-emoji v1.0.5 h1:EMVWyCGPlXJfUXBXpuMu+ii3TIaxbVBnEX9uaDC4cIk=
 github.com/yuin/goldmark-emoji v1.0.5/go.mod h1:tTkZEbwu5wkPmgTcitqddVxY9osFZiavD+r4AzQrh1U=
 github.com/ziutek/mymysql v1.5.4 h1:GB0qdRGsTwQSBVYuVShFBKaXSnSnYYC2d9knnE1LHFs=
