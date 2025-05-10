@@ -17,3 +17,8 @@ node_modules/
 package.json
 package-lock.json
 template
+config.json
+Caddyfile
+config.sample.json
+Caddyfile.sample
+.env

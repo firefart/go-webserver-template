@@ -26,8 +26,10 @@ template
 
 config.json
 !config.sample.json
+Caddyfile
 *.secret
 *.env
+.env
 *.sqlite3
 *.sqlite3-journal
 *.sqlite3-shm

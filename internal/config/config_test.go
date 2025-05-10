@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -10,42 +9,12 @@ import (
 )
 
 func TestParseConfig(t *testing.T) {
-	public, err := os.CreateTemp(t.TempDir(), "test")
-	require.NoError(t, err)
-	defer func(public *os.File) {
-		err := public.Close()
-		require.NoError(t, err)
-	}(public)
-	defer func(name string) {
-		err := os.Remove(name)
-		require.NoError(t, err)
-	}(public.Name())
-	private, err := os.CreateTemp(t.TempDir(), "test")
-	require.NoError(t, err)
-	defer func(private *os.File) {
-		err := private.Close()
-		require.NoError(t, err)
-	}(private)
-	defer func(name string) {
-		err := os.Remove(name)
-		require.NoError(t, err)
-	}(private.Name())
-
-	config := fmt.Sprintf(`{
+	config := `{
   "server": {
-    "listen": "127.0.0.1:8000",
-    "listen_pprof": "127.0.0.1:1234",
-		"listen_metrics": "127.0.0.1:1235",
     "graceful_timeout": "5s",
     "cloudflare": false,
     "secret_key_header_name": "X-Secret-Key-Header",
     "secret_key_header_value": "SECRET",
-    "tls": {
-      "public_key": "%[1]s",
-      "private_key": "%[2]s",
-      "mtls_root_ca": "%[1]s",
-      "mtls_cert_subject": "Subject"
-    }
   },
   "cache": {
     "enabled": true,
@@ -123,7 +92,7 @@ func TestParseConfig(t *testing.T) {
       ]
     }
   }
-}`, public.Name(), private.Name())
+}`
 
 	f, err := os.CreateTemp(t.TempDir(), "config")
 	require.NoError(t, err)
@@ -142,17 +111,10 @@ func TestParseConfig(t *testing.T) {
 	c, err := GetConfig(tmpFilename)
 	require.NoError(t, err)
 
-	require.Equal(t, "127.0.0.1:8000", c.Server.Listen)
-	require.Equal(t, "127.0.0.1:1234", c.Server.PprofListen)
-	require.Equal(t, "127.0.0.1:1235", c.Server.MetricsListen)
 	require.Equal(t, 5*time.Second, c.Server.GracefulTimeout)
 	require.False(t, c.Server.Cloudflare)
 	require.Equal(t, "X-Secret-Key-Header", c.Server.SecretKeyHeaderName)
 	require.Equal(t, "SECRET", c.Server.SecretKeyHeaderValue)
-	require.Equal(t, public.Name(), c.Server.TLS.MTLSRootCA)
-	require.Equal(t, "Subject", c.Server.TLS.MTLSCertSubject)
-	require.Equal(t, public.Name(), c.Server.TLS.PublicKey)
-	require.Equal(t, private.Name(), c.Server.TLS.PrivateKey)
 
 	require.Equal(t, 5*time.Second, c.Timeout)
 
