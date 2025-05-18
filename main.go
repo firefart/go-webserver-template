@@ -27,18 +27,29 @@ import (
 	_ "net/http/pprof" // nolint: gosec
 )
 
+type cliConfig struct {
+	debugMode      bool
+	configFilename string
+	listen         string
+	listenPprof    string
+	listenMetrics  string
+}
+
 func main() {
 	if _, err := maxprocs.Set(); err != nil {
 		panic(fmt.Sprintf("Error on gomaxprocs: %v\n", err))
 	}
 
-	var debugMode bool
-	var configFilename string
+	var cli cliConfig
 	var jsonOutput bool
 	var version bool
 	var configCheckMode bool
-	flag.BoolVar(&debugMode, "debug", false, "Enable DEBUG mode")
-	flag.StringVar(&configFilename, "config", "", "config file to use")
+
+	flag.BoolVar(&cli.debugMode, "debug", false, "Enable DEBUG mode")
+	flag.StringVar(&cli.configFilename, "config", "", "config file to use")
+	flag.StringVar(&cli.listen, "listen", "127.0.0.1:8000", "listen address")
+	flag.StringVar(&cli.listenPprof, "listen-pprof", "127.0.0.1:1234", "listen address")
+	flag.StringVar(&cli.listenMetrics, "listen-metrics", "127.0.0.1:1235", "listen address")
 	flag.BoolVar(&jsonOutput, "json", false, "output in json instead")
 	flag.BoolVar(&configCheckMode, "configcheck", false, "just check the config")
 	flag.BoolVar(&version, "version", false, "show version")
@@ -54,13 +65,13 @@ func main() {
 		os.Exit(0)
 	}
 
-	logger := newLogger(debugMode, jsonOutput)
+	logger := newLogger(cli.debugMode, jsonOutput)
 	ctx := context.Background()
 	var err error
 	if configCheckMode {
-		err = configCheck(configFilename)
+		err = configCheck(cli.configFilename)
 	} else {
-		err = run(ctx, logger, configFilename, debugMode)
+		err = run(ctx, logger, cli)
 	}
 
 	if err != nil {
@@ -83,15 +94,15 @@ func configCheck(configFilename string) error {
 	return err
 }
 
-func run(ctx context.Context, logger *slog.Logger, configFilename string, debugMode bool) error {
+func run(ctx context.Context, logger *slog.Logger, cliConfig cliConfig) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	defer cancel()
 
-	if configFilename == "" {
+	if cliConfig.configFilename == "" {
 		return errors.New("please provide a config file")
 	}
 
-	configuration, err := config.GetConfig(configFilename)
+	configuration, err := config.GetConfig(cliConfig.configFilename)
 	if err != nil {
 		return err
 	}
@@ -101,7 +112,7 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 		return err
 	}
 
-	db, err := database.New(ctx, configuration, logger, debugMode)
+	db, err := database.New(ctx, configuration, logger, cliConfig.debugMode)
 	if err != nil {
 		return err
 	}
@@ -119,16 +130,16 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 
 	cache := cacher.New[string](ctx, logger, m, "cache", configuration.Cache.Timeout)
 
-	httpClient, err := http.NewHTTPClient(configuration, logger, debugMode)
+	httpClient, err := http.NewHTTPClient(configuration, logger, cliConfig.debugMode)
 	if err != nil {
 		return err
 	}
 
 	logger.Info("Starting server",
-		slog.String("host", configuration.Server.Listen),
+		slog.String("host", cliConfig.listen),
 		slog.Duration("gracefultimeout", configuration.Server.GracefulTimeout),
 		slog.Duration("timeout", configuration.Timeout),
-		slog.Bool("debug", debugMode),
+		slog.Bool("debug", cliConfig.debugMode),
 	)
 
 	options := []server.OptionsServerFunc{
@@ -136,7 +147,7 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 		server.WithConfig(configuration),
 		server.WithDB(db),
 		server.WithNotify(notify),
-		server.WithDebug(debugMode),
+		server.WithDebug(cliConfig.debugMode),
 		server.WithMetrics(m, reg),
 		server.WithCache(cache),
 		server.WithHTTPClient(httpClient),
@@ -156,42 +167,25 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 	)
 
 	srv := &nethttp.Server{
-		Addr:         configuration.Server.Listen,
+		Addr:         cliConfig.listen,
 		Handler:      s,
 		ReadTimeout:  configuration.Timeout,
 		WriteTimeout: configuration.Timeout,
 	}
-
-	if configuration.Server.TLS.PublicKey != "" && configuration.Server.TLS.PrivateKey != "" {
-		tlsConfig, err := setupTLSConfig(logger, configuration)
-		if err != nil {
-			return err
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, nethttp.ErrServerClosed) {
+			logger.Error("error on listenandserve", slog.String("err", err.Error()))
+			// emit signal to kill server
+			cancel()
 		}
-		srv.TLSConfig = tlsConfig
-
-		go func() {
-			if err := srv.ListenAndServeTLS(configuration.Server.TLS.PublicKey, configuration.Server.TLS.PrivateKey); err != nil && !errors.Is(err, nethttp.ErrServerClosed) {
-				logger.Error("error on listenandserveTLS", slog.String("err", err.Error()))
-				// emit signal to kill server
-				cancel()
-			}
-		}()
-	} else {
-		go func() {
-			if err := srv.ListenAndServe(); err != nil && !errors.Is(err, nethttp.ErrServerClosed) {
-				logger.Error("error on listenandserve", slog.String("err", err.Error()))
-				// emit signal to kill server
-				cancel()
-			}
-		}()
-	}
+	}()
 
 	logger.Info("Starting pprof server",
-		slog.String("host", configuration.Server.PprofListen),
+		slog.String("host", cliConfig.listenPprof),
 	)
 
 	pprofSrv := &nethttp.Server{ // nolint: gosec
-		Addr: configuration.Server.PprofListen,
+		Addr: cliConfig.listenPprof,
 	}
 	go func() {
 		pprofMux := nethttp.NewServeMux()
@@ -210,11 +204,11 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 	}()
 
 	logger.Info("Starting metrics server",
-		slog.String("host", configuration.Server.MetricsListen),
+		slog.String("host", cliConfig.listenMetrics),
 	)
 
 	metricsSrv := &nethttp.Server{ // nolint: gosec
-		Addr: configuration.Server.MetricsListen,
+		Addr: cliConfig.listenMetrics,
 	}
 	go func() {
 		metricsMux := nethttp.NewServeMux()
