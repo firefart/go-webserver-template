@@ -14,7 +14,7 @@ func TestParseConfig(t *testing.T) {
     "graceful_timeout": "5s",
     "cloudflare": false,
     "secret_key_header_name": "X-Secret-Key-Header",
-    "secret_key_header_value": "SECRET",
+    "secret_key_header_value": "SECRET"
   },
   "cache": {
     "enabled": true,
