@@ -24,6 +24,6 @@ certs/
 node_modules/
 package.json
 package-lock.json
-entra-phishing-detection
+__REPLACE__WITH__BINARY__NAME__
 Caddyfile
 .env
