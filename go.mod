@@ -20,7 +20,7 @@ require (
 	github.com/wneessen/go-mail v0.6.2
 	go.uber.org/automaxprocs v1.6.0
 	golang.org/x/net v0.40.0
-	modernc.org/sqlite v1.37.0
+	modernc.org/sqlite v1.37.1
 )
 
 require (
@@ -110,7 +110,7 @@ require (
 	github.com/pingcap/errors v0.11.5-0.20240311024730-e056997136bb // indirect
 	github.com/pingcap/failpoint v0.0.0-20240528011301-b51a646c7c86 // indirect
 	github.com/pingcap/log v1.1.0 // indirect
-	github.com/pingcap/tidb/pkg/parser v0.0.0-20250520102310-07f4eda04057 // indirect
+	github.com/pingcap/tidb/pkg/parser v0.0.0-20250521083446-bf9fbde9e9f6 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.64.0 // indirect
@@ -143,8 +143,8 @@ require (
 	github.com/ydb-platform/ydb-go-genproto v0.0.0-20250519101544-1f330d77b70f // indirect
 	github.com/ydb-platform/ydb-go-sdk/v3 v3.108.4 // indirect
 	github.com/ziutek/mymysql v1.5.4 // indirect
-	go.opentelemetry.io/otel v1.35.0 // indirect
-	go.opentelemetry.io/otel/trace v1.35.0 // indirect
+	go.opentelemetry.io/otel v1.36.0 // indirect
+	go.opentelemetry.io/otel/trace v1.36.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
