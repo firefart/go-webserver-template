@@ -3,7 +3,7 @@ module github.com/firefart/go-webserver-template
 go 1.24
 
 require (
-	github.com/a-h/templ v0.3.865
+	github.com/a-h/templ v0.3.887
 	github.com/charmbracelet/log v0.4.2
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/hashicorp/go-multierror v1.1.1
@@ -68,7 +68,7 @@ require (
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible // indirect
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
-	github.com/gohugoio/hugo v0.147.6 // indirect
+	github.com/gohugoio/hugo v0.147.7 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
@@ -124,7 +124,7 @@ require (
 	github.com/sethvargo/go-retry v0.3.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/spf13/afero v1.14.0 // indirect
-	github.com/spf13/cast v1.8.0 // indirect
+	github.com/spf13/cast v1.9.0 // indirect
 	github.com/spf13/cobra v1.9.1 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/sqlc-dev/sqlc v1.29.0 // indirect
