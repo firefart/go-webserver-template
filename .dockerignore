@@ -27,3 +27,6 @@ package-lock.json
 __REPLACE__WITH__BINARY__NAME__
 Caddyfile
 .env
+.vscode
+.dockerignore
+template
