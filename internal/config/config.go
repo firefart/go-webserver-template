@@ -70,7 +70,7 @@ type Notification struct {
 	Telegram NotificationTelegram `koanf:"telegram"`
 	Discord  NotificationDiscord  `koanf:"discord"`
 	Email    NotificationEmail    `koanf:"email"`
-	SendGrid NotificationSendGrid `koanf:"sendgrid"`
+	Mailgun  NotificationMailgun  `koanf:"mailgun"`
 	MSTeams  NotificationMSTeams  `koanf:"msteams"`
 }
 
@@ -96,11 +96,11 @@ type NotificationEmail struct {
 	Recipients []string `koanf:"recipients" validate:"required_if=Enabled true,dive,email"`
 }
 
-type NotificationSendGrid struct {
+type NotificationMailgun struct {
 	Enabled       bool     `koanf:"enabled"`
 	APIKey        string   `koanf:"api_key" validate:"required_if=Enabled true"`
 	SenderAddress string   `koanf:"sender_address" validate:"required_if=Enabled true,email"`
-	SenderName    string   `koanf:"sender_name" validate:"required_if=Enabled true"`
+	Domain        string   `koanf:"domain" validate:"required_if=Enabled true"`
 	Recipients    []string `koanf:"recipients" validate:"required_if=Enabled true,dive,email"`
 }
 
