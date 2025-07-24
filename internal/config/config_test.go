@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -10,42 +9,12 @@ import (
 )
 
 func TestParseConfig(t *testing.T) {
-	public, err := os.CreateTemp(t.TempDir(), "test")
-	require.NoError(t, err)
-	defer func(public *os.File) {
-		err := public.Close()
-		require.NoError(t, err)
-	}(public)
-	defer func(name string) {
-		err := os.Remove(name)
-		require.NoError(t, err)
-	}(public.Name())
-	private, err := os.CreateTemp(t.TempDir(), "test")
-	require.NoError(t, err)
-	defer func(private *os.File) {
-		err := private.Close()
-		require.NoError(t, err)
-	}(private)
-	defer func(name string) {
-		err := os.Remove(name)
-		require.NoError(t, err)
-	}(private.Name())
-
-	config := fmt.Sprintf(`{
+	config := `{
   "server": {
-    "listen": "127.0.0.1:8000",
-    "listen_pprof": "127.0.0.1:1234",
-		"listen_metrics": "127.0.0.1:1235",
     "graceful_timeout": "5s",
     "cloudflare": false,
     "secret_key_header_name": "X-Secret-Key-Header",
-    "secret_key_header_value": "SECRET",
-    "tls": {
-      "public_key": "%[1]s",
-      "private_key": "%[2]s",
-      "mtls_root_ca": "%[1]s",
-      "mtls_cert_subject": "Subject"
-    }
+    "secret_key_header_value": "SECRET"
   },
   "cache": {
     "enabled": true,
@@ -105,11 +74,11 @@ func TestParseConfig(t *testing.T) {
         "a@a.com"
       ]
     },
-    "sendgrid": {
+    "mailgun": {
       "enabled": true,
       "api_key": "apikey",
       "sender_address": "test@test.com",
-      "sender_name": "Test",
+      "domain": "test.com",
       "recipients": [
         "test@test.com",
         "a@a.com"
@@ -123,7 +92,7 @@ func TestParseConfig(t *testing.T) {
       ]
     }
   }
-}`, public.Name(), private.Name())
+}`
 
 	f, err := os.CreateTemp(t.TempDir(), "config")
 	require.NoError(t, err)
@@ -142,17 +111,10 @@ func TestParseConfig(t *testing.T) {
 	c, err := GetConfig(tmpFilename)
 	require.NoError(t, err)
 
-	require.Equal(t, "127.0.0.1:8000", c.Server.Listen)
-	require.Equal(t, "127.0.0.1:1234", c.Server.PprofListen)
-	require.Equal(t, "127.0.0.1:1235", c.Server.MetricsListen)
 	require.Equal(t, 5*time.Second, c.Server.GracefulTimeout)
 	require.False(t, c.Server.Cloudflare)
 	require.Equal(t, "X-Secret-Key-Header", c.Server.SecretKeyHeaderName)
 	require.Equal(t, "SECRET", c.Server.SecretKeyHeaderValue)
-	require.Equal(t, public.Name(), c.Server.TLS.MTLSRootCA)
-	require.Equal(t, "Subject", c.Server.TLS.MTLSCertSubject)
-	require.Equal(t, public.Name(), c.Server.TLS.PublicKey)
-	require.Equal(t, private.Name(), c.Server.TLS.PrivateKey)
 
 	require.Equal(t, 5*time.Second, c.Timeout)
 
@@ -197,12 +159,12 @@ func TestParseConfig(t *testing.T) {
 	require.Equal(t, "test@test.com", c.Notifications.Email.Recipients[0])
 	require.Equal(t, "a@a.com", c.Notifications.Email.Recipients[1])
 
-	require.Equal(t, "apikey", c.Notifications.SendGrid.APIKey)
-	require.Equal(t, "test@test.com", c.Notifications.SendGrid.SenderAddress)
-	require.Equal(t, "Test", c.Notifications.SendGrid.SenderName)
-	require.Len(t, c.Notifications.SendGrid.Recipients, 2)
-	require.Equal(t, "test@test.com", c.Notifications.SendGrid.Recipients[0])
-	require.Equal(t, "a@a.com", c.Notifications.SendGrid.Recipients[1])
+	require.Equal(t, "apikey", c.Notifications.Mailgun.APIKey)
+	require.Equal(t, "test@test.com", c.Notifications.Mailgun.SenderAddress)
+	require.Equal(t, "test.com", c.Notifications.Mailgun.Domain)
+	require.Len(t, c.Notifications.Mailgun.Recipients, 2)
+	require.Equal(t, "test@test.com", c.Notifications.Mailgun.Recipients[0])
+	require.Equal(t, "a@a.com", c.Notifications.Mailgun.Recipients[1])
 
 	require.Len(t, c.Notifications.MSTeams.Webhooks, 2)
 	require.Equal(t, "https://url1.com", c.Notifications.MSTeams.Webhooks[0])

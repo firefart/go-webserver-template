@@ -26,21 +26,10 @@ type Configuration struct {
 }
 
 type Server struct {
-	Listen               string        `koanf:"listen" validate:"required,hostname_port"`
-	PprofListen          string        `koanf:"listen_pprof" validate:"required,hostname_port"`
-	MetricsListen        string        `koanf:"listen_metrics" validate:"required,hostname_port"`
 	GracefulTimeout      time.Duration `koanf:"graceful_timeout" validate:"required"`
 	Cloudflare           bool          `koanf:"cloudflare"`
 	SecretKeyHeaderName  string        `koanf:"secret_key_header_name" validate:"required"`
 	SecretKeyHeaderValue string        `koanf:"secret_key_header_value" validate:"required"`
-	TLS                  TLS           `koanf:"tls"`
-}
-
-type TLS struct {
-	PublicKey       string `koanf:"public_key" validate:"omitempty,file"`
-	PrivateKey      string `koanf:"private_key" validate:"omitempty,file"`
-	MTLSRootCA      string `koanf:"mtls_root_ca" validate:"omitempty,file"`
-	MTLSCertSubject string `koanf:"mtls_cert_subject"`
 }
 
 type Proxy struct {
@@ -81,7 +70,7 @@ type Notification struct {
 	Telegram NotificationTelegram `koanf:"telegram"`
 	Discord  NotificationDiscord  `koanf:"discord"`
 	Email    NotificationEmail    `koanf:"email"`
-	SendGrid NotificationSendGrid `koanf:"sendgrid"`
+	Mailgun  NotificationMailgun  `koanf:"mailgun"`
 	MSTeams  NotificationMSTeams  `koanf:"msteams"`
 }
 
@@ -107,11 +96,11 @@ type NotificationEmail struct {
 	Recipients []string `koanf:"recipients" validate:"required_if=Enabled true,dive,email"`
 }
 
-type NotificationSendGrid struct {
+type NotificationMailgun struct {
 	Enabled       bool     `koanf:"enabled"`
 	APIKey        string   `koanf:"api_key" validate:"required_if=Enabled true"`
 	SenderAddress string   `koanf:"sender_address" validate:"required_if=Enabled true,email"`
-	SenderName    string   `koanf:"sender_name" validate:"required_if=Enabled true"`
+	Domain        string   `koanf:"domain" validate:"required_if=Enabled true"`
 	Recipients    []string `koanf:"recipients" validate:"required_if=Enabled true,dive,email"`
 }
 
@@ -122,9 +111,6 @@ type NotificationMSTeams struct {
 
 var defaultConfig = Configuration{
 	Server: Server{
-		Listen:              "127.0.0.1:8000",
-		PprofListen:         "127.0.0.1:1234",
-		MetricsListen:       "127.0.0.1:1235",
 		GracefulTimeout:     10 * time.Second,
 		Cloudflare:          false,
 		SecretKeyHeaderName: "X-Secret-Key-Header",
