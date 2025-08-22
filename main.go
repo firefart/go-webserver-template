@@ -22,7 +22,6 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.uber.org/automaxprocs/maxprocs"
 
 	_ "net/http/pprof" // nolint: gosec
 )
@@ -36,10 +35,6 @@ type cliConfig struct {
 }
 
 func main() {
-	if _, err := maxprocs.Set(); err != nil {
-		panic(fmt.Sprintf("Error on gomaxprocs: %v\n", err))
-	}
-
 	var cli cliConfig
 	var jsonOutput bool
 	var version bool
