@@ -16,7 +16,7 @@ require (
 	github.com/nikoksr/notify v1.3.0
 	github.com/pressly/goose/v3 v3.24.3
 	github.com/prometheus/client_golang v1.23.0
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.0
 	github.com/wneessen/go-mail v0.6.2
 	go.uber.org/automaxprocs v1.6.0
 	golang.org/x/net v0.43.0
