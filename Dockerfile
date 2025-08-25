@@ -10,6 +10,9 @@ RUN go build -a -o app -ldflags="-s -w" -trimpath
 
 FROM alpine:latest
 
+RUN apk add --no-cache curl ca-certificates \
+    && rm -rf /var/cache/*
+
 RUN mkdir -p /app \
     && adduser -D user \
     && chown -R user:user /app
@@ -19,6 +22,6 @@ WORKDIR /app
 
 COPY --from=build-env /src/app .
 
-EXPOSE 8080
+HEALTHCHECK --interval=5s --timeout=10s --start-period=5s --retries=3 CMD curl -f -sS http://localhost:8000/health || exit 1
 
 ENTRYPOINT [ "./app" ]
