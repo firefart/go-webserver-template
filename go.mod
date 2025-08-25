@@ -21,7 +21,6 @@ require (
 	github.com/prometheus/client_golang v1.23.0
 	github.com/stretchr/testify v1.11.0
 	github.com/wneessen/go-mail v0.6.2
-	go.uber.org/automaxprocs v1.6.0
 	golang.org/x/net v0.43.0
 	modernc.org/sqlite v1.38.2
 )
