@@ -14,7 +14,7 @@ require (
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/mattn/go-isatty v0.0.20
 	github.com/nikoksr/notify v1.3.0
-	github.com/pressly/goose/v3 v3.24.3
+	github.com/pressly/goose/v3 v3.25.0
 	github.com/prometheus/client_golang v1.23.0
 	github.com/stretchr/testify v1.11.0
 	github.com/wneessen/go-mail v0.6.2
@@ -52,7 +52,7 @@ require (
 	github.com/cubicdaiya/gonp v1.0.4 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/elastic/go-sysinfo v1.15.3 // indirect
+	github.com/elastic/go-sysinfo v1.15.4 // indirect
 	github.com/elastic/go-windows v1.0.2 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
