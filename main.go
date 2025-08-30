@@ -60,7 +60,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	logger := newLogger(cli.debugMode, jsonOutput)
+	logger := newLogger(cli.debugMode, jsonOutput, nil)
 	ctx := context.Background()
 	var err error
 	if configCheckMode {
