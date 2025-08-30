@@ -2,10 +2,9 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"runtime/debug"
-
-	"github.com/labstack/echo/v4"
 )
 
 type VersionHandler struct{}
@@ -14,10 +13,13 @@ func NewVersionHandler() *VersionHandler {
 	return &VersionHandler{}
 }
 
-func (h *VersionHandler) EchoHandler(c echo.Context) error {
+func (h *VersionHandler) Handler(w http.ResponseWriter, _ *http.Request) error {
 	buildInfo, ok := debug.ReadBuildInfo()
 	if !ok {
 		return errors.New("unable to determine version information")
 	}
-	return c.String(http.StatusOK, buildInfo.String())
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "text/plain")
+	fmt.Fprint(w, buildInfo.String())
+	return nil
 }
