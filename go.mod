@@ -2,9 +2,6 @@ module github.com/firefart/go-webserver-template
 
 go 1.25
 
-// prevent updating parser version automatically until a new version of sqlc is released
-replace github.com/pingcap/tidb/pkg/parser => github.com/pingcap/tidb/pkg/parser v0.0.0-20250324122243-d51e00e5bbf0
-
 require (
 	github.com/a-h/templ v0.3.943
 	github.com/charmbracelet/log v0.4.2
