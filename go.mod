@@ -110,7 +110,7 @@ require (
 	github.com/pingcap/errors v0.11.5-0.20250523034308-74f78ae071ee // indirect
 	github.com/pingcap/failpoint v0.0.0-20240528011301-b51a646c7c86 // indirect
 	github.com/pingcap/log v1.1.0 // indirect
-	github.com/pingcap/tidb/pkg/parser v0.0.0-20250923102316-a8ef81a436fe // indirect
+	github.com/pingcap/tidb/pkg/parser v0.0.0-20250924100925-71caddf56d9c // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.66.1 // indirect
@@ -118,7 +118,7 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/riza-io/grpc-go v0.2.0 // indirect
-	github.com/segmentio/asm v1.2.0 // indirect
+	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/sendgrid/rest v2.6.9+incompatible // indirect
 	github.com/sendgrid/sendgrid-go v3.16.1+incompatible // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect
