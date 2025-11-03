@@ -20,7 +20,7 @@ require (
 	github.com/wneessen/go-mail v0.7.2
 	go.uber.org/automaxprocs v1.6.0
 	golang.org/x/net v0.46.0
-	modernc.org/sqlite v1.39.1
+	modernc.org/sqlite v1.40.0
 )
 
 require (
@@ -112,7 +112,7 @@ require (
 	github.com/pingcap/errors v0.11.5-0.20250523034308-74f78ae071ee // indirect
 	github.com/pingcap/failpoint v0.0.0-20240528011301-b51a646c7c86 // indirect
 	github.com/pingcap/log v1.1.0 // indirect
-	github.com/pingcap/tidb/pkg/parser v0.0.0-20251031105235-a2d42842d2eb // indirect
+	github.com/pingcap/tidb/pkg/parser v0.0.0-20251103074335-bce559b421ad // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.67.2 // indirect
