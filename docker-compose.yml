@@ -6,7 +6,7 @@ services:
     command: "-config /app/config.json -json -listen :8000 -listen-pprof :1234 -listen-metrics :1235"
     hostname: app
     healthcheck:
-      test: curl -f -sS ${HEALTHCHECK:-http://localhost:8000/health} || exit 1
+      test: curl -f -sS -H "${SECRET_KEY_HEADER_NAME:-X-Secret-Key-Header}:${SECRET_KEY_HEADER_VALUE:-SECRET}" ${HEALTHCHECK:-http://localhost:8000/health} || exit 1
       interval: 5s
       timeout: 10s
       start_period: 5s
@@ -24,6 +24,7 @@ services:
     restart: unless-stopped
     ports:
       - "${WEB_LISTEN:-0.0.0.0:8000}:8888"
+      - "${METRICS_LISTEN:-0.0.0.0:8001}:8889"
     configs:
       - source: caddyfile
         target: /etc/caddy/Caddyfile

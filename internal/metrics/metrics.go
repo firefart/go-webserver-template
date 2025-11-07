@@ -8,6 +8,7 @@ import (
 )
 
 type Metrics struct {
+	Errors          *prometheus.CounterVec
 	CacheHits       *prometheus.CounterVec
 	CacheMisses     *prometheus.CounterVec
 	RequestCount    *prometheus.CounterVec
@@ -18,6 +19,13 @@ type Metrics struct {
 
 func NewMetrics(reg prometheus.Registerer, opts ...OptionsMetricsFunc) (*Metrics, error) {
 	m := &Metrics{
+		Errors: prometheus.NewCounterVec(
+			prometheus.CounterOpts{
+				Name: "errors_total",
+				Help: "How many errors were encountered while processing requests.",
+			},
+			[]string{"host"},
+		),
 		CacheHits: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: "cache_hits_total",
@@ -39,6 +47,9 @@ func NewMetrics(reg prometheus.Registerer, opts ...OptionsMetricsFunc) (*Metrics
 	}
 	if err := reg.Register(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{})); err != nil {
 		return nil, fmt.Errorf("failed to register process collector: %w", err)
+	}
+	if err := reg.Register(m.Errors); err != nil {
+		return nil, fmt.Errorf("failed to register errors metric: %w", err)
 	}
 	if err := reg.Register(m.CacheHits); err != nil {
 		return nil, fmt.Errorf("failed to register cache hits metric: %w", err)

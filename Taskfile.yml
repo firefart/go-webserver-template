@@ -28,10 +28,10 @@ tasks:
 
   setup:
     cmds:
-      - npm i -D tailwindcss@latest @tailwindcss/cli
-      - npm i -D @tailwindcss/typography
-      - npm i -D daisyui@latest
-      - npm audit fix
+      - npm i --no-fund -D tailwindcss@latest @tailwindcss/cli
+      - npm i --no-fund -D @tailwindcss/typography
+      - npm i --no-fund -D daisyui@latest
+      - npm --no-fund audit fix
 
   build:
     aliases: [default]

@@ -1,25 +1,22 @@
 package middleware
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
-
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 type SecretKeyHeaderConfig struct {
-	// Skipper defines a function to skip middleware.
-	Skipper middleware.Skipper
-
 	// the secret key header name we should check
 	SecretKeyHeaderName  string
 	SecretKeyHeaderValue string
 
+	Debug bool
+
 	Logger *slog.Logger
 }
 
-func SecretKeyHeader(config SecretKeyHeaderConfig) echo.MiddlewareFunc {
+func SecretKeyHeader(config SecretKeyHeaderConfig) func(next http.Handler) http.Handler {
 	// Defaults
 	if config.SecretKeyHeaderName == "" {
 		panic("secret key header middleware requires a header name")
@@ -27,32 +24,42 @@ func SecretKeyHeader(config SecretKeyHeaderConfig) echo.MiddlewareFunc {
 	if config.SecretKeyHeaderValue == "" {
 		panic("secret key header middleware requires a header value")
 	}
-	if config.Skipper == nil {
-		config.Skipper = middleware.DefaultSkipper
-	}
 	if config.Logger == nil {
 		config.Logger = slog.New(slog.DiscardHandler)
 	}
 
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			if config.Skipper(c) {
-				return next(c)
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if config.Debug {
+				next.ServeHTTP(w, r)
+				return
 			}
 
-			headerVal := c.Request().Header.Get(config.SecretKeyHeaderName)
+			headerVal := r.Header.Get(config.SecretKeyHeaderName)
 			// no header set
 			if headerVal == "" {
-				config.Logger.Error("url called without secret header", slog.String("url", c.Request().URL.String()))
-				return c.NoContent(http.StatusOK)
+				ip, ok := r.Context().Value(ContextKeyIP).(string)
+				if !ok {
+					ip = r.RemoteAddr
+				}
+				config.Logger.Error("url called without secret header", slog.String("url", r.URL.String()), slog.String("ip", ip))
+				w.WriteHeader(http.StatusOK)
+				fmt.Fprint(w, "")
+				return
 			}
 
 			if headerVal == config.SecretKeyHeaderValue {
-				return next(c)
+				next.ServeHTTP(w, r)
+				return
 			}
 
-			config.Logger.Error("url called with wrong secret header", slog.String("header", headerVal))
-			return c.NoContent(http.StatusOK)
-		}
+			ip, ok := r.Context().Value(ContextKeyIP).(string)
+			if !ok {
+				ip = r.RemoteAddr
+			}
+			config.Logger.Error("url called with wrong secret header", slog.String("header", headerVal), slog.String("ip", ip))
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprint(w, "")
+		})
 	}
 }

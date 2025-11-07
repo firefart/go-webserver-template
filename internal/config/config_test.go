@@ -12,99 +12,16 @@ func TestParseConfig(t *testing.T) {
 	config := `{
   "server": {
     "graceful_timeout": "5s",
-    "cloudflare": false,
     "secret_key_header_name": "X-Secret-Key-Header",
-    "secret_key_header_value": "SECRET"
+    "secret_key_header_value": "SECRET",
+		"ip_header": "IP-Header"
   },
-  "cache": {
-    "enabled": true,
-    "timeout": "1h"
-  },
-  "timeout": "5s",
-  "mail": {
-    "enabled": true,
-    "server": "server.com",
-    "port": 25,
-    "from": {
-      "name": "From",
-      "email": "user@domain.com"
-    },
-    "to": [
-      "user1@domain.com",
-      "user2@domain.com"
-    ],
-    "user": "username",
-    "password": "password",
-    "tls": false,
-    "starttls": true,
-    "skiptls": false,
-    "retries": 5,
-    "timeout": "5s"
-  },
-  "database": {
-    "filename": "data.db"
-  },
-  "notifications": {
-    "telegram": {
-      "enabled": true,
-      "api_token": "token",
-      "chat_ids": [
-        1,
-        2
-      ]
-    },
-    "discord": {
-      "enabled": true,
-      "bot_token": "token",
-      "oauth_token": "",
-      "channel_ids": [
-        "1",
-        "2"
-      ]
-    },
-    "email": {
-      "enabled": true,
-      "sender": "test@test.com",
-      "server": "smtp.server.com",
-      "port": 25,
-      "username": "user",
-      "password": "pass",
-      "recipients": [
-        "test@test.com",
-        "a@a.com"
-      ]
-    },
-    "mailgun": {
-      "enabled": true,
-      "api_key": "apikey",
-      "sender_address": "test@test.com",
-      "domain": "test.com",
-      "recipients": [
-        "test@test.com",
-        "a@a.com"
-      ]
-    },
-    "msteams": {
-      "enabled": true,
-      "webhooks": [
-        "https://url1.com",
-        "https://url2.com"
-      ]
-    }
-  }
+  "timeout": "5s"
 }`
 
 	f, err := os.CreateTemp(t.TempDir(), "config")
 	require.NoError(t, err)
 	tmpFilename := f.Name()
-	defer func(f *os.File) {
-		err := f.Close()
-		require.NoError(t, err)
-	}(f)
-	defer func(name string) {
-		err := os.Remove(name)
-		require.NoError(t, err)
-	}(tmpFilename)
 	_, err = f.WriteString(config)
 	require.NoError(t, err)
 
@@ -112,61 +29,292 @@ func TestParseConfig(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, 5*time.Second, c.Server.GracefulTimeout)
-	require.False(t, c.Server.Cloudflare)
 	require.Equal(t, "X-Secret-Key-Header", c.Server.SecretKeyHeaderName)
 	require.Equal(t, "SECRET", c.Server.SecretKeyHeaderValue)
 
+	require.Equal(t, "IP-Header", c.Server.IPHeader)
+
 	require.Equal(t, 5*time.Second, c.Timeout)
+}
 
-	require.True(t, c.Cache.Enabled)
-	require.Equal(t, 1*time.Hour, c.Cache.Timeout)
+func TestGetConfigDefaults(t *testing.T) {
+	// Create minimal config that should use defaults
+	config := `{
+		"server": {
+			"secret_key_header_name": "X-Secret-Key",
+			"secret_key_header_value": "SECRET"
+		}
+	}`
 
-	require.True(t, c.Mail.Enabled)
-	require.Equal(t, "server.com", c.Mail.Server)
-	require.Equal(t, 25, c.Mail.Port)
-	require.Equal(t, "From", c.Mail.From.Name)
-	require.Equal(t, "user@domain.com", c.Mail.From.Mail)
-	require.Len(t, c.Mail.To, 2)
-	require.Equal(t, "user1@domain.com", c.Mail.To[0])
-	require.Equal(t, "user2@domain.com", c.Mail.To[1])
-	require.Equal(t, "username", c.Mail.User)
-	require.Equal(t, "password", c.Mail.Password)
-	require.False(t, c.Mail.TLS)
-	require.True(t, c.Mail.StartTLS)
-	require.False(t, c.Mail.SkipTLS)
-	require.Equal(t, 5, c.Mail.Retries)
-	require.Equal(t, 5*time.Second, c.Mail.Timeout)
+	f, err := os.CreateTemp(t.TempDir(), "config")
+	require.NoError(t, err)
+	tmpFilename := f.Name()
+	_, err = f.WriteString(config)
+	require.NoError(t, err)
 
-	require.Equal(t, "data.db", c.Database.Filename)
+	c, err := GetConfig(tmpFilename)
+	require.NoError(t, err)
 
-	require.Len(t, c.Notifications.Telegram.ChatIDs, 2)
-	require.Equal(t, int64(1), c.Notifications.Telegram.ChatIDs[0])
-	require.Equal(t, int64(2), c.Notifications.Telegram.ChatIDs[1])
-	require.Equal(t, "token", c.Notifications.Telegram.APIToken)
+	// Should use default values
+	require.Equal(t, 10*time.Second, c.Server.GracefulTimeout)
+	require.Equal(t, 5*time.Second, c.Timeout)
+}
 
-	require.Len(t, c.Notifications.Discord.ChannelIDs, 2)
-	require.Equal(t, "1", c.Notifications.Discord.ChannelIDs[0])
-	require.Equal(t, "2", c.Notifications.Discord.ChannelIDs[1])
-	require.Equal(t, "token", c.Notifications.Discord.BotToken)
-	require.Empty(t, c.Notifications.Discord.OAuthToken)
+func TestGetConfigValidationErrors(t *testing.T) {
+	tests := []struct {
+		name   string
+		config string
+		err    string
+	}{
+		{
+			name: "missing secret key header value",
+			config: `{
+				"server": {
+					"secret_key_header_name": "X-Secret-Key",
+					"secret_key_header_value": ""
+				}
+			}`,
+			err: "'SecretKeyHeaderValue' failed on the 'required' tag",
+		},
+		{
+			name: "empty secret key header name",
+			config: `{
+				"server": {
+					"secret_key_header_name": "",
+					"secret_key_header_value": "SECRET"
+				}
+			}`,
+			err: "'SecretKeyHeaderName' failed on the 'required' tag",
+		},
+	}
 
-	require.Equal(t, "test@test.com", c.Notifications.Email.Sender)
-	require.Equal(t, "smtp.server.com", c.Notifications.Email.Server)
-	require.Equal(t, 25, c.Notifications.Email.Port)
-	require.Equal(t, "user", c.Notifications.Email.Username)
-	require.Equal(t, "pass", c.Notifications.Email.Password)
-	require.Len(t, c.Notifications.Email.Recipients, 2)
-	require.Equal(t, "test@test.com", c.Notifications.Email.Recipients[0])
-	require.Equal(t, "a@a.com", c.Notifications.Email.Recipients[1])
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f, err := os.CreateTemp(t.TempDir(), "config")
+			require.NoError(t, err)
+			tmpFilename := f.Name()
+			_, err = f.WriteString(tt.config)
+			require.NoError(t, err)
 
-	require.Equal(t, "apikey", c.Notifications.Mailgun.APIKey)
-	require.Equal(t, "test@test.com", c.Notifications.Mailgun.SenderAddress)
-	require.Equal(t, "test.com", c.Notifications.Mailgun.Domain)
-	require.Len(t, c.Notifications.Mailgun.Recipients, 2)
-	require.Equal(t, "test@test.com", c.Notifications.Mailgun.Recipients[0])
-	require.Equal(t, "a@a.com", c.Notifications.Mailgun.Recipients[1])
+			_, err = GetConfig(tmpFilename)
+			require.Error(t, err)
+			require.ErrorContains(t, err, tt.err)
+		})
+	}
+}
 
-	require.Len(t, c.Notifications.MSTeams.Webhooks, 2)
-	require.Equal(t, "https://url1.com", c.Notifications.MSTeams.Webhooks[0])
-	require.Equal(t, "https://url2.com", c.Notifications.MSTeams.Webhooks[1])
+func TestGetConfigFileErrors(t *testing.T) {
+	// Test non-existent file
+	_, err := GetConfig("non-existent-file.json")
+	require.Error(t, err)
+
+	// Test invalid JSON
+	f, err := os.CreateTemp(t.TempDir(), "config")
+	require.NoError(t, err)
+	tmpFilename := f.Name()
+
+	_, err = f.WriteString("{invalid json")
+	require.NoError(t, err)
+
+	_, err = GetConfig(tmpFilename)
+	require.Error(t, err)
+}
+
+func TestGetConfigWithHostHeaders(t *testing.T) {
+	config := `{
+		"server": {
+			"secret_key_header_name": "X-Secret-Key",
+			"secret_key_header_value": "SECRET",
+			"host_headers": ["X-Forwarded-Host", "X-Original-Host"]
+		}
+	}`
+
+	f, err := os.CreateTemp(t.TempDir(), "config")
+	require.NoError(t, err)
+	tmpFilename := f.Name()
+	_, err = f.WriteString(config)
+	require.NoError(t, err)
+
+	c, err := GetConfig(tmpFilename)
+	require.NoError(t, err)
+	require.Equal(t, []string{"X-Forwarded-Host", "X-Original-Host"}, c.Server.HostHeaders)
+}
+
+func TestConfigWithEnvVars(t *testing.T) {
+	t.Setenv("GO_SERVER_SECRET__KEY__HEADER__NAME", "X-XXXX")
+	t.Setenv("GO_SERVER_SECRET__KEY__HEADER__VALUE", "SECRET")
+	c, err := GetConfig("")
+	require.NoError(t, err)
+	require.Equal(t, "X-XXXX", c.Server.SecretKeyHeaderName)
+	require.Equal(t, "SECRET", c.Server.SecretKeyHeaderValue)
+}
+
+func TestEnvironmentVariableTransformation(t *testing.T) {
+	tests := []struct {
+		name     string
+		envVar   string
+		envValue string
+		expected string
+		getField func(c Configuration) string
+	}{
+		{
+			name:     "double underscore to single underscore",
+			envVar:   "GO_SERVER_SECRET__KEY__HEADER__NAME",
+			envValue: "X-Custom-Header",
+			expected: "X-Custom-Header",
+			getField: func(c Configuration) string { return c.Server.SecretKeyHeaderName },
+		},
+		{
+			name:     "single underscore to dot",
+			envVar:   "GO_SERVER_GRACEFUL__TIMEOUT",
+			envValue: "15s",
+			expected: "15s",
+			getField: func(c Configuration) string { return c.Server.GracefulTimeout.String() },
+		},
+		{
+			name:     "mixed underscores",
+			envVar:   "GO_SERVER_SECRET__KEY__HEADER__VALUE",
+			envValue: "secret-value-123",
+			expected: "secret-value-123",
+			getField: func(c Configuration) string { return c.Server.SecretKeyHeaderValue },
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Clear any existing environment variables
+			os.Clearenv()
+
+			// Set the test environment variable and required fields
+			t.Setenv(tt.envVar, tt.envValue)
+			// Set required fields that aren't being tested
+			t.Setenv("GO_SERVER_SECRET__KEY__HEADER__NAME", "X-Secret-Key")
+			t.Setenv("GO_SERVER_SECRET__KEY__HEADER__VALUE", "SECRET")
+
+			// Override with the specific test value if it's one of the required fields
+			t.Setenv(tt.envVar, tt.envValue)
+
+			// Get config without a file (only env vars and defaults)
+			c, err := GetConfig("")
+			require.NoError(t, err)
+
+			// Validate the field was set correctly
+			actual := tt.getField(c)
+			require.Equal(t, tt.expected, actual)
+		})
+	}
+}
+
+func TestGetConfigNoFile(t *testing.T) {
+	// Set required environment variables for validation
+	t.Setenv("GO_SERVER_SECRET__KEY__HEADER__VALUE", "SECRET")
+
+	// Test that GetConfig works with empty filename (only defaults + env vars)
+	c, err := GetConfig("")
+	require.NoError(t, err)
+
+	// Should have default values
+	require.Equal(t, "127.0.0.1:8000", c.Server.Listen)
+	require.Empty(t, c.Server.ListenMetrics)
+	require.Empty(t, c.Server.ListenPprof)
+	require.Equal(t, 10*time.Second, c.Server.GracefulTimeout)
+	require.Equal(t, "X-Secret-Key-Header", c.Server.SecretKeyHeaderName)
+	require.Equal(t, "SECRET", c.Server.SecretKeyHeaderValue)
+	require.Equal(t, 5*time.Second, c.Timeout)
+}
+
+func TestGetConfigLoggingValidation(t *testing.T) {
+	tests := []struct {
+		name        string
+		config      string
+		expectedErr string
+	}{
+		{
+			name: "invalid max_size should fail validation",
+			config: `{
+				"server": {
+					"secret_key_header_name": "X-Secret-Key",
+					"secret_key_header_value": "SECRET"
+				},
+				"logging": {
+					"rotate": {
+						"enabled": true,
+						"max_size": -1
+					}
+				}
+			}`,
+			expectedErr: "'MaxSize' failed on the 'gte' tag",
+		},
+		{
+			name: "invalid max_backups should fail validation",
+			config: `{
+				"server": {
+					"secret_key_header_name": "X-Secret-Key",
+					"secret_key_header_value": "SECRET"
+				},
+				"logging": {
+					"rotate": {
+						"enabled": true,
+						"max_backups": -1
+					}
+				}
+			}`,
+			expectedErr: "'MaxBackups' failed on the 'gte' tag",
+		},
+		{
+			name: "invalid max_age should fail validation",
+			config: `{
+				"server": {
+					"secret_key_header_name": "X-Secret-Key",
+					"secret_key_header_value": "SECRET"
+				},
+				"logging": {
+					"rotate": {
+						"enabled": true,
+						"max_age": -1
+					}
+				}
+			}`,
+			expectedErr: "'MaxAge' failed on the 'gte' tag",
+		},
+		{
+			name: "valid logging config should pass",
+			config: `{
+				"server": {
+					"secret_key_header_name": "X-Secret-Key",
+					"secret_key_header_value": "SECRET"
+				},
+				"logging": {
+					"access_log": true,
+					"json": true,
+					"log_file": "/var/log/app.log",
+					"rotate": {
+						"enabled": true,
+						"max_size": 100,
+						"max_backups": 5,
+						"max_age": 30,
+						"compress": true
+					}
+				}
+			}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f, err := os.CreateTemp(t.TempDir(), "config")
+			require.NoError(t, err)
+			tmpFilename := f.Name()
+			_, err = f.WriteString(tt.config)
+			require.NoError(t, err)
+
+			_, err = GetConfig(tmpFilename)
+			if tt.expectedErr != "" {
+				require.Error(t, err)
+				require.ErrorContains(t, err, tt.expectedErr)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
 }

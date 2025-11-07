@@ -3,8 +3,8 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/firefart/go-webserver-template/internal/server/helper"
 	"github.com/firefart/go-webserver-template/internal/server/templates"
-	"github.com/labstack/echo/v4"
 )
 
 type IndexHandler struct {
@@ -17,13 +17,22 @@ func NewIndexHandler(debug bool) *IndexHandler {
 	}
 }
 
-func (h *IndexHandler) EchoHandler(c echo.Context) error {
+func (h *IndexHandler) Handler(w http.ResponseWriter, r *http.Request) error {
 	component := templates.Homepage()
 
-	if isHTMX(c) {
+	w.WriteHeader(http.StatusOK)
+
+	if helper.IsHTMX(r) {
 		// only render the single component if it's a htmx request
-		return Render(c, http.StatusOK, component)
+		if err := component.Render(r.Context(), w); err != nil {
+			return err
+		}
+		return nil
 	}
 
-	return Render(c, http.StatusOK, templates.Layout(component, "Template", h.debug))
+	layout := templates.Layout(component, "Template", h.debug)
+	if err := layout.Render(r.Context(), w); err != nil {
+		return err
+	}
+	return nil
 }

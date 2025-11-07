@@ -13,36 +13,32 @@ func WithAccessLog() OptionsMetricsFunc {
 		labels := []string{"code", "method", "host", "path"}
 		m.RequestCount = prometheus.NewCounterVec(
 			prometheus.CounterOpts{
-				Namespace: "entra_phishing_detection",
-				Name:      "http_requests_total",
-				Help:      "How many HTTP requests processed, partitioned by status code and HTTP method.",
+				Name: "http_requests_total",
+				Help: "How many HTTP requests processed, partitioned by status code and HTTP method.",
 			},
 			labels,
 		)
 		m.RequestDuration = prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
-				Namespace: "entra_phishing_detection",
-				Name:      "http_request_duration_seconds",
-				Help:      "The HTTP request latencies in seconds.",
-				Buckets:   prometheus.DefBuckets,
+				Name:    "http_request_duration_seconds",
+				Help:    "The HTTP request latencies in seconds.",
+				Buckets: prometheus.DefBuckets,
 			},
 			labels,
 		)
 		m.ResponseSize = prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
-				Namespace: "entra_phishing_detection",
-				Name:      "http_response_size_bytes",
-				Help:      "The HTTP response sizes in bytes.",
-				Buckets:   prometheus.DefBuckets,
+				Name:    "http_response_size_bytes",
+				Help:    "The HTTP response sizes in bytes.",
+				Buckets: prometheus.DefBuckets,
 			},
 			labels,
 		)
 		m.RequestSize = prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
-				Namespace: "entra_phishing_detection",
-				Name:      "http_request_size_bytes",
-				Help:      "The HTTP request sizes in bytes.",
-				Buckets:   prometheus.DefBuckets,
+				Name:    "http_request_size_bytes",
+				Help:    "The HTTP request sizes in bytes.",
+				Buckets: prometheus.DefBuckets,
 			},
 			labels,
 		)
