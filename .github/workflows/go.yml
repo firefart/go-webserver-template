@@ -23,6 +23,11 @@ jobs:
         with:
           go-version: "stable"
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: latest
+
       - name: Install Task
         uses: arduino/setup-task@v2
         with:
