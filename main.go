@@ -9,6 +9,7 @@ import (
 	"log"
 	"log/slog"
 	nethttp "net/http"
+	"net/http/pprof"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -28,7 +29,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gopkg.in/natefinch/lumberjack.v2"
 
-	"net/http/pprof"
 	_ "net/http/pprof" // nolint: gosec
 )
 
