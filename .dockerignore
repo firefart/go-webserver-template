@@ -30,3 +30,13 @@ Caddyfile
 .vscode
 .dockerignore
 template
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-shm
+*.sqlite3-whl
+*.sqlite3-wal
+*.db
+*.db-journal
+*.db-shm
+*.db-whl
+*.db-wal

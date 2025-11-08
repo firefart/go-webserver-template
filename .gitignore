@@ -35,6 +35,11 @@ Caddyfile
 *.sqlite3-shm
 *.sqlite3-whl
 *.sqlite3-wal
+*.db
+*.db-journal
+*.db-shm
+*.db-whl
+*.db-wal
 *.pem
 tmp/
 node_modules/

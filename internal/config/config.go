@@ -101,16 +101,16 @@ type NotificationTelegram struct {
 }
 type NotificationDiscord struct {
 	Enabled    bool     `koanf:"enabled"`
-	BotToken   string   `koanf:"bot_token" validate:"required_without=OAuthToken,excluded_with=OAuthToken"`
-	OAuthToken string   `koanf:"oauth_token" validate:"required_without=BotToken,excluded_with=BotToken"`
+	BotToken   string   `koanf:"bot_token"`
+	OAuthToken string   `koanf:"oauth_token"`
 	ChannelIDs []string `koanf:"channel_ids" validate:"required_if=Enabled true,dive"`
 }
 
 type NotificationEmail struct {
 	Enabled    bool     `koanf:"enabled"`
-	Sender     string   `koanf:"sender" validate:"required_if=Enabled true,email"`
-	Server     string   `koanf:"server" validate:"required_if=Enabled true,fqdn"`
-	Port       int      `koanf:"port" validate:"required_if=Enabled true,gt=0,lte=65535"`
+	Sender     string   `koanf:"sender" validate:"required_if=Enabled true,omitempty,email"`
+	Server     string   `koanf:"server" validate:"required_if=Enabled true,omitempty,fqdn"`
+	Port       int      `koanf:"port" validate:"required_if=Enabled true,omitempty,gt=0,lte=65535"`
 	Username   string   `koanf:"username"`
 	Password   string   `koanf:"password"`
 	Recipients []string `koanf:"recipients" validate:"required_if=Enabled true,dive,email"`
@@ -119,9 +119,9 @@ type NotificationEmail struct {
 type NotificationMailgun struct {
 	Enabled       bool     `koanf:"enabled"`
 	APIKey        string   `koanf:"api_key" validate:"required_if=Enabled true"`
-	SenderAddress string   `koanf:"sender_address" validate:"required_if=Enabled true,email"`
+	SenderAddress string   `koanf:"sender_address" validate:"required_if=Enabled true,omitempty,email"`
 	Domain        string   `koanf:"domain" validate:"required_if=Enabled true"`
-	Recipients    []string `koanf:"recipients" validate:"required_if=Enabled true,dive,email"`
+	Recipients    []string `koanf:"recipients" validate:"required_if=Enabled true,dive,omitempty,email"`
 }
 
 type NotificationMSTeams struct {

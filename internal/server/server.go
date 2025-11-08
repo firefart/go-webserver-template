@@ -147,15 +147,15 @@ func NewServer(opts ...OptionsServerFunc) (http.Handler, error) {
 	if err != nil {
 		return nil, err
 	}
-	r.Handle("/scripts", http.FileServerFS(scripts))
+	r.Handle("/scripts/", http.StripPrefix("/scripts/", http.FileServerFS(scripts)))
 
 	css, err := fs.Sub(static, "css")
 	if err != nil {
 		return nil, err
 	}
-	r.Handle("/css", http.FileServerFS(css))
+	r.Handle("/css/", http.StripPrefix("/css/", http.FileServerFS(css)))
 
-	r.HandleFunc("/", handlers.NewIndexHandler(s.debug).Handler)
+	r.HandleFunc("GET /{$}", handlers.NewIndexHandler(s.debug).Handler)
 
 	r.Group(func(r *router.Router) {
 		r.Use(middleware.SecretKeyHeader(middleware.SecretKeyHeaderConfig{
