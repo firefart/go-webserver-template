@@ -28,8 +28,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gopkg.in/natefinch/lumberjack.v2"
-
-	_ "net/http/pprof" // nolint: gosec
 )
 
 type cliOptions struct {
@@ -124,11 +122,6 @@ func main() {
 		logger.Error(err.Error())
 		os.Exit(1) // nolint: gocritic
 	}
-}
-
-func configCheck(configFilename string) error {
-	_, err := config.GetConfig(configFilename)
-	return err
 }
 
 func run(ctx context.Context, logger *slog.Logger, configuration config.Configuration, cliOptions cliOptions) error {
