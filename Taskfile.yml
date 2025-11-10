@@ -9,7 +9,7 @@ tasks:
       - go mod tidy -v
 
   update:
-    deps: [htmx-update, generate]
+    deps: [htmx-update, prompt-update, generate]
     cmds:
       - go get -u
       - go get -u tool
@@ -87,6 +87,11 @@ tasks:
     vars:
       GOPATH:
         sh: go env GOPATH
+
+  prompt-update:
+    # https://daisyui.com/docs/editor/vscode/
+    cmds:
+      - curl -sSfL https://daisyui.com/llms.txt --create-dirs -o .github/instructions/daisyui.instructions.md
 
   tag:
     cmds:
