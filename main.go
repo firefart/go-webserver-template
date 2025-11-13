@@ -5,12 +5,17 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
+	"log"
 	"log/slog"
 	nethttp "net/http"
+	"net/http/pprof"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"runtime/debug"
 	"syscall"
+	"time"
 
 	"github.com/firefart/go-webserver-template/internal/cacher"
 	"github.com/firefart/go-webserver-template/internal/config"
@@ -22,22 +27,20 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.uber.org/automaxprocs/maxprocs"
-
-	_ "net/http/pprof" // nolint: gosec
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-func main() {
-	if _, err := maxprocs.Set(); err != nil {
-		panic(fmt.Sprintf("Error on gomaxprocs: %v\n", err))
-	}
+type cliOptions struct {
+	debugMode bool
+}
 
-	var debugMode bool
-	var configFilename string
+func main() {
 	var jsonOutput bool
 	var version bool
 	var configCheckMode bool
-	flag.BoolVar(&debugMode, "debug", false, "Enable DEBUG mode")
+	var configFilename string
+	cli := cliOptions{}
+	flag.BoolVar(&cli.debugMode, "debug", false, "Enable DEBUG mode")
 	flag.StringVar(&configFilename, "config", "", "config file to use")
 	flag.BoolVar(&jsonOutput, "json", false, "output in json instead")
 	flag.BoolVar(&configCheckMode, "configcheck", false, "just check the config")
@@ -54,46 +57,86 @@ func main() {
 		os.Exit(0)
 	}
 
-	logger := newLogger(debugMode, jsonOutput)
-	ctx := context.Background()
-	var err error
-	if configCheckMode {
-		err = configCheck(configFilename)
-	} else {
-		err = run(ctx, logger, configFilename, debugMode)
-	}
-
+	configuration, err := config.GetConfig(configFilename)
 	if err != nil {
-		// check if we have a multierror
+		// check if we have a multierror from multiple validation errors
 		var merr *multierror.Error
 		if errors.As(err, &merr) {
 			for _, e := range merr.Errors {
-				logger.Error(e.Error())
+				log.Println("Error in config:", e.Error())
 			}
 			os.Exit(1)
 		}
 		// a normal error
+		log.Fatalln("Error in config:", err.Error())
+	}
+
+	// if we are in config check mode, we just validate the config and exit
+	// if the config has errors, the statements above will already exit with an error
+	if configCheckMode {
+		return
+	}
+
+	var logger *slog.Logger
+	if configuration.Logging.LogFile != "" {
+		// Create parent directory if it doesn't exist
+		if err := os.MkdirAll(filepath.Dir(configuration.Logging.LogFile), 0o755); err != nil {
+			log.Fatalf("Error creating log directory: %v\n", err)
+		}
+
+		logFile, err := os.OpenFile(configuration.Logging.LogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
+		if err != nil {
+			log.Fatalf("Error opening log file: %v\n", err)
+		}
+		defer logFile.Close()
+
+		var writer io.Writer
+		if configuration.Logging.Rotate.Enabled {
+			logRotator := &lumberjack.Logger{
+				Filename: configuration.Logging.LogFile,
+			}
+			if configuration.Logging.Rotate.MaxSize > 0 {
+				logRotator.MaxSize = configuration.Logging.Rotate.MaxSize
+			}
+			if configuration.Logging.Rotate.MaxBackups > 0 {
+				logRotator.MaxBackups = configuration.Logging.Rotate.MaxBackups
+			}
+			if configuration.Logging.Rotate.MaxAge > 0 {
+				logRotator.MaxAge = configuration.Logging.Rotate.MaxAge
+			}
+			if configuration.Logging.Rotate.Compress {
+				logRotator.Compress = configuration.Logging.Rotate.Compress
+			}
+			writer = logRotator
+		} else {
+			writer = logFile
+		}
+		logger = newLogger(cli.debugMode, configuration.Logging.JSON, writer)
+	} else {
+		logger = newLogger(cli.debugMode, configuration.Logging.JSON, nil)
+	}
+
+	ctx := context.Background()
+	err = run(ctx, logger, configuration, cli)
+	if err != nil {
 		logger.Error(err.Error())
-		os.Exit(1)
+		os.Exit(1) // nolint: gocritic
 	}
 }
 
-func configCheck(configFilename string) error {
-	_, err := config.GetConfig(configFilename)
-	return err
-}
-
-func run(ctx context.Context, logger *slog.Logger, configFilename string, debugMode bool) error {
+func run(ctx context.Context, logger *slog.Logger, configuration config.Configuration, cliOptions cliOptions) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	defer cancel()
 
-	if configFilename == "" {
-		return errors.New("please provide a config file")
+	reg := prometheus.NewRegistry()
+	var metricOpts []metrics.OptionsMetricsFunc
+	if configuration.Logging.AccessLog {
+		metricOpts = append(metricOpts, metrics.WithAccessLog())
 	}
 
-	configuration, err := config.GetConfig(configFilename)
+	m, err := metrics.NewMetrics(reg, metricOpts...)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create metrics: %w", err)
 	}
 
 	notify, err := setupNotifications(configuration, logger)
@@ -101,7 +144,7 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 		return err
 	}
 
-	db, err := database.New(ctx, configuration, logger, debugMode)
+	db, err := database.New(ctx, configuration, logger, cliOptions.debugMode)
 	if err != nil {
 		return err
 	}
@@ -111,35 +154,26 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 		}
 	}()
 
-	reg := prometheus.NewRegistry()
-	m, err := metrics.NewMetrics(reg)
-	if err != nil {
-		return err
-	}
-
 	cache := cacher.New[string](ctx, logger, m, "cache", configuration.Cache.Timeout)
 
-	httpClient, err := http.NewHTTPClient(configuration, logger, debugMode)
+	httpClient, err := http.NewHTTPClient(configuration, logger, cliOptions.debugMode)
 	if err != nil {
 		return err
 	}
-
-	logger.Info("Starting server",
-		slog.String("host", configuration.Server.Listen),
-		slog.Duration("gracefultimeout", configuration.Server.GracefulTimeout),
-		slog.Duration("timeout", configuration.Timeout),
-		slog.Bool("debug", debugMode),
-	)
 
 	options := []server.OptionsServerFunc{
 		server.WithLogger(logger),
 		server.WithConfig(configuration),
 		server.WithDB(db),
 		server.WithNotify(notify),
-		server.WithDebug(debugMode),
-		server.WithMetrics(m, reg),
+		server.WithDebug(cliOptions.debugMode),
+		server.WithMetrics(m),
 		server.WithCache(cache),
 		server.WithHTTPClient(httpClient),
+	}
+
+	if configuration.Logging.AccessLog {
+		options = append(options, server.WithAccessLog())
 	}
 
 	if configuration.Mail.Enabled {
@@ -150,10 +184,10 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 		options = append(options, server.WithMailer(mailer))
 	}
 
-	s := server.NewServer(
-		ctx,
-		options...,
-	)
+	s, err := server.NewServer(options...)
+	if err != nil {
+		return fmt.Errorf("failed to create server: %w", err)
+	}
 
 	srv := &nethttp.Server{
 		Addr:         configuration.Server.Listen,
@@ -162,69 +196,72 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 		WriteTimeout: configuration.Timeout,
 	}
 
-	if configuration.Server.TLS.PublicKey != "" && configuration.Server.TLS.PrivateKey != "" {
-		tlsConfig, err := setupTLSConfig(logger, configuration)
-		if err != nil {
-			return err
-		}
-		srv.TLSConfig = tlsConfig
-
-		go func() {
-			if err := srv.ListenAndServeTLS(configuration.Server.TLS.PublicKey, configuration.Server.TLS.PrivateKey); err != nil && !errors.Is(err, nethttp.ErrServerClosed) {
-				logger.Error("error on listenandserveTLS", slog.String("err", err.Error()))
-				// emit signal to kill server
-				cancel()
-			}
-		}()
-	} else {
-		go func() {
-			if err := srv.ListenAndServe(); err != nil && !errors.Is(err, nethttp.ErrServerClosed) {
-				logger.Error("error on listenandserve", slog.String("err", err.Error()))
-				// emit signal to kill server
-				cancel()
-			}
-		}()
-	}
-
-	logger.Info("Starting pprof server",
-		slog.String("host", configuration.Server.PprofListen),
-	)
-
-	pprofSrv := &nethttp.Server{ // nolint: gosec
-		Addr: configuration.Server.PprofListen,
-	}
 	go func() {
-		pprofMux := nethttp.NewServeMux()
-		// pprof is automatically added to the DefaultServeMux
-		// this is not used anywhere so it's safe to use the auto
-		// implementation. The following line makes sure we use
-		// the configuration from defaultservermux
-		// If you ever want to use the default serve mux: don't
-		// otherwise you will expose the debug endpoints
-		pprofMux.Handle("/debug/pprof/", nethttp.DefaultServeMux) // pprof is defined on the default servemux
-		pprofSrv.Handler = pprofMux
-		if err := pprofSrv.ListenAndServe(); err != nil && !errors.Is(err, nethttp.ErrServerClosed) {
-			logger.Error("error on pprof", slog.String("err", err.Error()))
+		logger.Info("Starting server",
+			slog.String("host", configuration.Server.Listen),
+			slog.Duration("gracefultimeout", configuration.Server.GracefulTimeout),
+			slog.Duration("timeout", configuration.Timeout),
+			slog.Bool("debug", cliOptions.debugMode),
+		)
+
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, nethttp.ErrServerClosed) {
+			logger.Error("error on listenandserve", slog.String("err", err.Error()))
+			// emit signal to kill server
 			cancel()
 		}
 	}()
 
-	logger.Info("Starting metrics server",
-		slog.String("host", configuration.Server.MetricsListen),
-	)
-
-	metricsSrv := &nethttp.Server{ // nolint: gosec
-		Addr: configuration.Server.MetricsListen,
-	}
-	go func() {
-		metricsMux := nethttp.NewServeMux()
-		metricsMux.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}))
-		metricsSrv.Handler = metricsMux
-		if err := metricsSrv.ListenAndServe(); err != nil && !errors.Is(err, nethttp.ErrServerClosed) {
-			logger.Error("error on metric", slog.String("err", err.Error()))
-			cancel()
+	var srvMetrics *nethttp.Server
+	if configuration.Server.ListenMetrics != "" {
+		muxMetrics := nethttp.NewServeMux()
+		muxMetrics.Handle("GET /metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg}))
+		srvMetrics = &nethttp.Server{
+			Addr:         configuration.Server.ListenMetrics,
+			Handler:      muxMetrics,
+			ReadTimeout:  configuration.Timeout,
+			WriteTimeout: configuration.Timeout,
 		}
-	}()
+
+		go func() {
+			logger.Info("Starting metrics server",
+				slog.String("host", configuration.Server.ListenMetrics),
+			)
+			if err := srvMetrics.ListenAndServe(); err != nil && !errors.Is(err, nethttp.ErrServerClosed) {
+				logger.Error("error on metrics listenandserve", slog.String("err", err.Error()))
+				// emit signal to kill server
+				cancel()
+			}
+		}()
+	}
+
+	var srvPprof *nethttp.Server
+	if configuration.Server.ListenPprof != "" {
+		muxPprof := nethttp.NewServeMux()
+		// copied from https://go.dev/src/net/http/pprof/pprof.go
+		muxPprof.HandleFunc("GET /debug/pprof/", pprof.Index)
+		muxPprof.HandleFunc("GET /debug/pprof/cmdline", pprof.Cmdline)
+		muxPprof.HandleFunc("GET /debug/pprof/profile", pprof.Profile)
+		muxPprof.HandleFunc("GET /debug/pprof/symbol", pprof.Symbol)
+		muxPprof.HandleFunc("GET /debug/pprof/trace", pprof.Trace)
+		srvPprof = &nethttp.Server{
+			Addr:    configuration.Server.ListenPprof,
+			Handler: muxPprof,
+			// higher timeout for pprof
+			ReadTimeout:  2 * time.Minute,
+			WriteTimeout: 2 * time.Minute,
+		}
+
+		go func() {
+			logger.Info("Starting pprof server",
+				slog.String("host", configuration.Server.ListenPprof),
+			)
+			if err := srvPprof.ListenAndServe(); err != nil && !errors.Is(err, nethttp.ErrServerClosed) {
+				logger.Error("error on pprof listenandserve", slog.String("err", err.Error()))
+				// emit signal to kill server
+				cancel()
+			}
+		}()
+	}
 
 	// wait for a signal
 	<-ctx.Done()
@@ -232,14 +269,19 @@ func run(ctx context.Context, logger *slog.Logger, configFilename string, debugM
 	// create a new context for shutdown
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), configuration.Server.GracefulTimeout)
 	defer cancel()
+
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		logger.Error("error on srv shutdown", slog.String("err", err.Error()))
 	}
-	if err := pprofSrv.Shutdown(shutdownCtx); err != nil {
-		logger.Error("error on pprofsrv shutdown", slog.String("err", err.Error()))
+	if srvMetrics != nil {
+		if err := srvMetrics.Shutdown(shutdownCtx); err != nil {
+			logger.Error("error on metrics srv shutdown", slog.String("err", err.Error()))
+		}
 	}
-	if err := metricsSrv.Shutdown(shutdownCtx); err != nil {
-		logger.Error("error on metricsSrv shutdown", slog.String("err", err.Error()))
+	if srvPprof != nil {
+		if err := srvPprof.Shutdown(shutdownCtx); err != nil {
+			logger.Error("error on pprof srv shutdown", slog.String("err", err.Error()))
+		}
 	}
 	return nil
 }

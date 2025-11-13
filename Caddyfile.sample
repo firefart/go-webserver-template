@@ -1,0 +1,41 @@
+{
+	# debug
+	admin off
+	metrics {
+		per_host
+	}
+	auto_https off
+	servers {
+		trusted_proxies static private_ranges
+		client_ip_headers CF-Connecting-IP
+		trusted_proxies_strict
+	}
+}
+
+# healthchecks
+:1337 {
+	respond "OK" 200
+}
+
+# pprof
+127.0.0.1:1234 {
+	reverse_proxy app:1234
+}
+
+:8888 {
+	log
+
+	reverse_proxy app:8000
+}
+
+# prometheus metrics
+:8889 {
+	@denied not client_ip private_ranges # replace with prometheus IP
+	abort @denied
+
+	# expose caddy metrics under a different endpoint
+	metrics /caddy/metrics
+
+	# app specific metrics
+	reverse_proxy app:1235
+}

@@ -9,10 +9,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestIndex(t *testing.T) {
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+func TestHealth(t *testing.T) {
 	rec := httptest.NewRecorder()
-	require.NoError(t, handlers.NewIndexHandler(true).Handler(rec, req))
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	require.NoError(t, handlers.NewHealthHandler().Handler(rec, req))
 	require.Equal(t, http.StatusOK, rec.Code)
-	require.Greater(t, len(rec.Body.String()), 10)
+	require.Equal(t, "OK", rec.Body.String())
 }

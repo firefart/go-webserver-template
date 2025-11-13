@@ -9,7 +9,7 @@ tasks:
       - go mod tidy -v
 
   update:
-    deps: [htmx-update, generate]
+    deps: [htmx-update, prompt-update, generate]
     cmds:
       - go get -u
       - go get -u tool
@@ -28,10 +28,10 @@ tasks:
 
   setup:
     cmds:
-      - npm i -D tailwindcss@latest @tailwindcss/cli
-      - npm i -D @tailwindcss/typography
-      - npm i -D daisyui@latest
-      - npm audit fix
+      - npm i --no-fund -D tailwindcss@latest @tailwindcss/cli
+      - npm i --no-fund -D @tailwindcss/typography
+      - npm i --no-fund -D daisyui@latest
+      - npm --no-fund audit fix
 
   build:
     aliases: [default]
@@ -87,6 +87,11 @@ tasks:
     vars:
       GOPATH:
         sh: go env GOPATH
+
+  prompt-update:
+    # https://daisyui.com/docs/editor/vscode/
+    cmds:
+      - curl -sSfL https://daisyui.com/llms.txt --create-dirs -o .github/instructions/daisyui.instructions.md
 
   tag:
     cmds:
