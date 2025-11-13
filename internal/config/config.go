@@ -66,20 +66,20 @@ type Cache struct {
 
 type Mail struct {
 	Enabled bool   `koanf:"enabled"`
-	Server  string `koanf:"server" validate:"required"`
-	Port    int    `koanf:"port" validate:"required,gt=0,lte=65535"`
+	Server  string `koanf:"server" validate:"required_if=Enabled true,omitempty,fqdn"`
+	Port    int    `koanf:"port" validate:"required_if=Enabled true,omitempty,gt=0,lte=65535"`
 	From    struct {
-		Name string `koanf:"name" validate:"required"`
-		Mail string `koanf:"email" validate:"required,email"`
+		Name string `koanf:"name" validate:"required_if=Enabled true"`
+		Mail string `koanf:"email" validate:"required_if=Enabled true,omitempty,email"`
 	} `koanf:"from"`
-	To       []string      `koanf:"to" validate:"required,dive,email"`
+	To       []string      `koanf:"to" validate:"required_if=Enabled true,omitempty,dive,email"`
 	User     string        `koanf:"user"`
 	Password string        `koanf:"password"`
 	TLS      bool          `koanf:"tls"`
 	StartTLS bool          `koanf:"starttls"`
 	SkipTLS  bool          `koanf:"skiptls"`
-	Retries  int           `koanf:"retries" validate:"required"`
-	Timeout  time.Duration `koanf:"timeout" validate:"required"`
+	Retries  int           `koanf:"retries" validate:"required_if=Enabled true"`
+	Timeout  time.Duration `koanf:"timeout" validate:"required_if=Enabled true"`
 }
 
 type Database struct {
