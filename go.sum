@@ -67,8 +67,8 @@ github.com/bep/goportabletext v0.1.0 h1:8dqym2So1cEqVZiBa4ZnMM1R9l/DnC1h4ONg4J5k
 github.com/bep/goportabletext v0.1.0/go.mod h1:6lzSTsSue75bbcyvVc0zqd1CdApuT+xkZQ6Re5DzZFg=
 github.com/bep/helpers v0.6.0 h1:qtqMCK8XPFNM9hp5Ztu9piPjxNNkk8PIyUVjg6v8Bsw=
 github.com/bep/helpers v0.6.0/go.mod h1:IOZlgx5PM/R/2wgyCatfsgg5qQ6rNZJNDpWGXqDR044=
-github.com/bep/imagemeta v0.12.0 h1:ARf+igs5B7pf079LrqRnwzQ/wEB8Q9v4NSDRZO1/F5k=
-github.com/bep/imagemeta v0.12.0/go.mod h1:23AF6O+4fUi9avjiydpKLStUNtJr5hJB4rarG18JpN8=
+github.com/bep/imagemeta v0.12.1 h1:43sIg/XJhXLVOo6troJFj9dyUr1jH+VN2UjO4/l26cQ=
+github.com/bep/imagemeta v0.12.1/go.mod h1:23AF6O+4fUi9avjiydpKLStUNtJr5hJB4rarG18JpN8=
 github.com/bep/lazycache v0.8.0 h1:lE5frnRjxaOFbkPZ1YL6nijzOPPz6zeXasJq8WpG4L8=
 github.com/bep/lazycache v0.8.0/go.mod h1:BQ5WZepss7Ko91CGdWz8GQZi/fFnCcyWupv8gyTeKwk=
 github.com/bep/logg v0.4.0 h1:luAo5mO4ZkhA5M1iDVDqDqnBBnlHjmtZF6VAyTp+nCQ=
@@ -210,8 +210,8 @@ github.com/gohugoio/hashstructure v0.6.0 h1:7wMB/2CfXoThFYhdWRGv3u3rUM761Cq29CxU
 github.com/gohugoio/hashstructure v0.6.0/go.mod h1:lapVLk9XidheHG1IQ4ZSbyYrXcaILU1ZEP/+vno5rBQ=
 github.com/gohugoio/httpcache v0.8.0 h1:hNdsmGSELztetYCsPVgjA960zSa4dfEqqF/SficorCU=
 github.com/gohugoio/httpcache v0.8.0/go.mod h1:fMlPrdY/vVJhAriLZnrF5QpN3BNAcoBClgAyQd+lGFI=
-github.com/gohugoio/hugo v0.153.2 h1:kutEknKjwChaC764ydJz5tNQC1MqXI7PSz0c6YV6Lmo=
-github.com/gohugoio/hugo v0.153.2/go.mod h1:qwagavzIztzFYaMep3UPoAW4Pa/5gr1bt61u8Xs/5AI=
+github.com/gohugoio/hugo v0.153.3 h1:skp4UBe9gb7QqkhnbMjH95h1PikGQxMH0knjV9llGW0=
+github.com/gohugoio/hugo v0.153.3/go.mod h1:buHOnElHSjVJCNbk4pbrYZ9szKVxBTEUYreFth35Rj4=
 github.com/gohugoio/hugo-goldmark-extensions/extras v0.5.0 h1:dco+7YiOryRoPOMXwwaf+kktZSCtlFtreNdiJbETvYE=
 github.com/gohugoio/hugo-goldmark-extensions/extras v0.5.0/go.mod h1:CRrxQTKeM3imw+UoS4EHKyrqB7Zp6sAJiqHit+aMGTE=
 github.com/gohugoio/hugo-goldmark-extensions/passthrough v0.3.1 h1:nUzXfRTszLliZuN0JTKeunXTRaiFX6ksaWP0puLLYAY=
@@ -285,8 +285,8 @@ github.com/jackc/pgpassfile v1.0.0 h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsI
 github.com/jackc/pgpassfile v1.0.0/go.mod h1:CEx0iS5ambNFdcRtxPj5JhEz+xB6uRky5eyVu/W2HEg=
 github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 h1:iCEnooe7UlwOQYpKFhBabPMi4aNAfoODPEFNiAnClxo=
 github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761/go.mod h1:5TJZWKEWniPve33vlWYSoGYefn3gLQRzjfDlhSJ9ZKM=
-github.com/jackc/pgx/v5 v5.7.6 h1:rWQc5FwZSPX58r1OQmkuaNicxdmExaEz5A2DO2hUuTk=
-github.com/jackc/pgx/v5 v5.7.6/go.mod h1:aruU7o91Tc2q2cFp5h4uP3f6ztExVpyVv88Xl/8Vl8M=
+github.com/jackc/pgx/v5 v5.8.0 h1:TYPDoleBBme0xGSAX3/+NujXXtpZn9HBONkQC7IEZSo=
+github.com/jackc/pgx/v5 v5.8.0/go.mod h1:QVeDInX2m9VyzvNeiCJVjCkNFqzsNb43204HshNSZKw=
 github.com/jackc/puddle/v2 v2.2.2 h1:PR8nw+E/1w0GLuRFSmiioY6UooMp6KJv0/61nB7icHo=
 github.com/jackc/puddle/v2 v2.2.2/go.mod h1:vriiEXHvEE654aYKXXjOvZM39qJ0q+azkZFrfEOc3H4=
 github.com/jdkato/prose v1.2.1 h1:Fp3UnJmLVISmlc57BgKUzdjr0lOtjqTZicL3PaYy6cU=
@@ -425,8 +425,8 @@ github.com/pingcap/failpoint v0.0.0-20251223101904-ae3b682f8d81 h1:ako10uTaQCmUr
 github.com/pingcap/failpoint v0.0.0-20251223101904-ae3b682f8d81/go.mod h1:W2aPZd2QKtIx73zYAtR4COUcpA8IALTlFbFOOs0ft6U=
 github.com/pingcap/log v1.1.0 h1:ELiPxACz7vdo1qAvvaWJg1NrYFoY6gqAh/+Uo6aXdD8=
 github.com/pingcap/log v1.1.0/go.mod h1:DWQW5jICDR7UJh4HtxXSM20Churx4CQL0fwL/SoOSA4=
-github.com/pingcap/tidb/pkg/parser v0.0.0-20251226115035-18eae64538a8 h1:TqfhV/g8TiLPoqbZt6tP/AIoJy/a2+zU7vlhAw4/uIk=
-github.com/pingcap/tidb/pkg/parser v0.0.0-20251226115035-18eae64538a8/go.mod h1:oHE+ub2QaDERd+UNHe4z2BhFV2jZrm7VNOe6atR9AF4=
+github.com/pingcap/tidb/pkg/parser v0.0.0-20251227104808-a7bc5dfee383 h1:iN3NAb1clSMcDylFBh/14OSAiheRbl+tRtVvdX6HXXc=
+github.com/pingcap/tidb/pkg/parser v0.0.0-20251227104808-a7bc5dfee383/go.mod h1:oHE+ub2QaDERd+UNHe4z2BhFV2jZrm7VNOe6atR9AF4=
 github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c h1:+mdjkGKdHQG3305AYmdv1U2eRNDiU2ErMBj1gwrq8eQ=
 github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c/go.mod h1:7rwL4CYBLnjLxUqIJNnCWiEdr3bn6IUYi15bNlnbCCU=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
