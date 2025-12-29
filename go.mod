@@ -20,7 +20,7 @@ require (
 	github.com/wneessen/go-mail v0.7.2
 	golang.org/x/net v0.48.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
-	modernc.org/sqlite v1.42.1
+	modernc.org/sqlite v1.42.2
 )
 
 require (
