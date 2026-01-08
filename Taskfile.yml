@@ -90,8 +90,14 @@ tasks:
 
   prompt-update:
     # https://daisyui.com/docs/editor/vscode/
+    # https://github.com/github/awesome-copilot/tree/main/instructions
     cmds:
       - curl -sSfL https://daisyui.com/llms.txt --create-dirs -o .github/instructions/daisyui.instructions.md
+      - curl -sSfL https://raw.githubusercontent.com/github/awesome-copilot/refs/heads/main/instructions/go.instructions.md --create-dirs -o .github/instructions/go.instructions.md
+      - curl -sSfL https://github.com/github/awesome-copilot/raw/refs/heads/main/instructions/containerization-docker-best-practices.instructions.md --create-dirs -o .github/instructions/containerization-docker-best-practices.instructions.md
+      - curl -sSfL https://github.com/github/awesome-copilot/raw/refs/heads/main/instructions/devops-core-principles.instructions.md --create-dirs -o .github/instructions/devops-core-principles.instructions.md
+      - curl -sSfL https://github.com/github/awesome-copilot/raw/refs/heads/main/instructions/github-actions-ci-cd-best-practices.instructions.md --create-dirs -o .github/instructions/github-actions-ci-cd-best-practices.instructions.md
+      - curl -sSfL https://github.com/github/awesome-copilot/raw/refs/heads/main/instructions/security-and-owasp.instructions.md --create-dirs -o .github/instructions/security-and-owasp.instructions.md
 
   tag:
     cmds:
