@@ -31,7 +31,8 @@
         "a-h.templ",
         "rangav.vscode-thunder-client",
         "Gruntfuggly.todo-tree",
-        "matthewpi.caddyfile-support"
+        "matthewpi.caddyfile-support",
+        "aaron-bond.better-comments"
       ]
     }
   }
