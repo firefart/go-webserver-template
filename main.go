@@ -28,6 +28,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gopkg.in/natefinch/lumberjack.v2"
+
+	_ "time/tzdata" // embed timezone data
 )
 
 type cliOptions struct {
