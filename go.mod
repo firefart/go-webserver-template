@@ -30,7 +30,7 @@ require (
 	github.com/ClickHouse/ch-go v0.69.0 // indirect
 	github.com/ClickHouse/clickhouse-go/v2 v2.42.0 // indirect
 	github.com/a-h/parse v0.0.0-20250122154542-74294addb73e // indirect
-	github.com/air-verse/air v1.64.0 // indirect
+	github.com/air-verse/air v1.64.1 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/atc0005/go-teams-notify/v2 v2.14.0 // indirect
@@ -118,7 +118,7 @@ require (
 	github.com/pingcap/errors v0.11.5-0.20250523034308-74f78ae071ee // indirect
 	github.com/pingcap/failpoint v0.0.0-20251231045439-91d91e123837 // indirect
 	github.com/pingcap/log v1.1.0 // indirect
-	github.com/pingcap/tidb/pkg/parser v0.0.0-20260119104620-a6fc928b99f0 // indirect
+	github.com/pingcap/tidb/pkg/parser v0.0.0-20260120100509-a72c5117d1b2 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.67.5 // indirect
