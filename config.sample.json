@@ -10,6 +10,7 @@
     "timeout": "1h"
   },
   "timeout": "5s",
+  "cert_dir": "/path/to/certdir",
   "mail": {
     "enabled": true,
     "server": "server.com",

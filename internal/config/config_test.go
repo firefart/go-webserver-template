@@ -1,7 +1,9 @@
 package config
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -317,4 +319,50 @@ func TestGetConfigLoggingValidation(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetConfigCertDirValidation(t *testing.T) {
+	t.Run("valid directory", func(t *testing.T) {
+		certDir := t.TempDir()
+
+		config := fmt.Sprintf(`{
+  "server": {
+    "secret_key_header_name": "X-Secret-Key",
+    "secret_key_header_value": "SECRET"
+  },
+  "cert_dir": %q
+}`, certDir)
+
+		f, err := os.CreateTemp(t.TempDir(), "config")
+		require.NoError(t, err)
+		tmpFilename := f.Name()
+		_, err = f.WriteString(config)
+		require.NoError(t, err)
+
+		c, err := GetConfig(tmpFilename)
+		require.NoError(t, err)
+		require.Equal(t, certDir, c.CertDir)
+	})
+
+	t.Run("invalid directory", func(t *testing.T) {
+		nonExistingDir := filepath.Join(t.TempDir(), "does-not-exist")
+
+		config := fmt.Sprintf(`{
+  "server": {
+    "secret_key_header_name": "X-Secret-Key",
+    "secret_key_header_value": "SECRET"
+  },
+  "cert_dir": %q
+}`, nonExistingDir)
+
+		f, err := os.CreateTemp(t.TempDir(), "config")
+		require.NoError(t, err)
+		tmpFilename := f.Name()
+		_, err = f.WriteString(config)
+		require.NoError(t, err)
+
+		_, err = GetConfig(tmpFilename)
+		require.Error(t, err)
+		require.ErrorContains(t, err, "'CertDir' failed on the 'dir' tag")
+	})
 }

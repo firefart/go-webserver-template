@@ -30,6 +30,16 @@ func NewHTTPClient(config config.Configuration, logger *slog.Logger, debugMode b
 		}
 		tr.Proxy = proxy.ProxyFromConfig
 	}
+
+	// add additional certs
+	if config.CertDir != "" {
+		rootCAs, err := getCertificateChain(config.CertDir)
+		if err != nil {
+			return nil, fmt.Errorf("could not get root cas: %w", err)
+		}
+		tr.TLSClientConfig.RootCAs = rootCAs
+	}
+
 	httpClient := http.Client{
 		Timeout:   config.Timeout,
 		Transport: tr,

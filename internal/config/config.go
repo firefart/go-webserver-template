@@ -26,6 +26,7 @@ type Configuration struct {
 	Notifications Notification  `koanf:"notifications"`
 	Timeout       time.Duration `koanf:"timeout" validate:"required"`
 	UserAgent     string        `koanf:"user_agent"`
+	CertDir       string        `koanf:"cert_dir" validate:"omitempty,dir"`
 }
 
 type Server struct {
