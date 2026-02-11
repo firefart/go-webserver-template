@@ -43,6 +43,7 @@ tasks:
       - go tool gofumpt -l -w .
       - go tool templ fmt .
       - go vet ./...
+      - go fix ./...
       - go build -o {{.PROGRAM}}
 
   test:
