@@ -94,7 +94,7 @@ require (
 	github.com/knadh/koanf/maps v0.1.2 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect
-	github.com/mailgun/mailgun-go/v5 v5.13.2 // indirect
+	github.com/mailgun/mailgun-go/v5 v5.14.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-runewidth v0.0.20 // indirect
 	github.com/mfridman/interpolate v0.0.2 // indirect
@@ -117,7 +117,7 @@ require (
 	github.com/pingcap/errors v0.11.5-0.20250523034308-74f78ae071ee // indirect
 	github.com/pingcap/failpoint v0.0.0-20251231045439-91d91e123837 // indirect
 	github.com/pingcap/log v1.1.0 // indirect
-	github.com/pingcap/tidb/pkg/parser v0.0.0-20260219190905-9b9281fa8d6d // indirect
+	github.com/pingcap/tidb/pkg/parser v0.0.0-20260224115418-5f3cbfe2d44c // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.67.5 // indirect
@@ -159,8 +159,8 @@ require (
 	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/text v0.34.0 // indirect
 	golang.org/x/tools v0.42.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260217215200-42d3e9bedb6d // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260217215200-42d3e9bedb6d // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260223185530-2f722ef697dc // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260223185530-2f722ef697dc // indirect
 	google.golang.org/grpc v1.79.1 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
