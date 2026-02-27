@@ -385,8 +385,8 @@ github.com/niklasfasching/go-org v1.9.1 h1:/3s4uTPOF06pImGa2Yvlp24yKXZoTYM+nsIlM
 github.com/niklasfasching/go-org v1.9.1/go.mod h1:ZAGFFkWvUQcpazmi/8nHqwvARpr1xpb+Es67oUGX/48=
 github.com/nikoksr/notify v1.5.0 h1:mzkCw8eb0P+qHwgmGQyPPGqz4GH+07FJDr44Bs16T9k=
 github.com/nikoksr/notify v1.5.0/go.mod h1:CEV9Bw9Y59K5oj7d8h83Xl32ATeL43ZEg9qTQsfwcCc=
-github.com/oapi-codegen/runtime v1.1.2 h1:P2+CubHq8fO4Q6fV1tqDBZHCwpVpvPg7oKiYzQgXIyI=
-github.com/oapi-codegen/runtime v1.1.2/go.mod h1:SK9X900oXmPWilYR5/WKPzt3Kqxn/uS/+lbpREv+eCg=
+github.com/oapi-codegen/runtime v1.2.0 h1:RvKc1CVS1QeKSNzO97FBQbSMZyQ8s6rZd+LpmzwHMP4=
+github.com/oapi-codegen/runtime v1.2.0/go.mod h1:Y7ZhmmlE8ikZOmuHRRndiIm7nf3xcVv+YMweKgG1DT0=
 github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 h1:G7ERwszslrBzRxj//JalHPu/3yz+De2J+4aLtSRlHiY=
 github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037/go.mod h1:2bpvgLBZEtENV5scfDFEtB/5+1M4hkQhDQrccEJ/qGw=
 github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 h1:bQx3WeLcUWy+RletIKwUIt4x3t8n2SxavmoclizMb8c=
@@ -421,8 +421,8 @@ github.com/pingcap/failpoint v0.0.0-20251231045439-91d91e123837 h1:+ercixPi76glO
 github.com/pingcap/failpoint v0.0.0-20251231045439-91d91e123837/go.mod h1:jimwlLpI/XtwQdlZML15HS+j4rirvwZM0GLY07wwgOo=
 github.com/pingcap/log v1.1.0 h1:ELiPxACz7vdo1qAvvaWJg1NrYFoY6gqAh/+Uo6aXdD8=
 github.com/pingcap/log v1.1.0/go.mod h1:DWQW5jICDR7UJh4HtxXSM20Churx4CQL0fwL/SoOSA4=
-github.com/pingcap/tidb/pkg/parser v0.0.0-20260226102906-b4081e9ce758 h1:7CxJnWk4D8o5FVVYkmE2SC1IxwBFbN9JRKVz1/cxW/w=
-github.com/pingcap/tidb/pkg/parser v0.0.0-20260226102906-b4081e9ce758/go.mod h1:oHE+ub2QaDERd+UNHe4z2BhFV2jZrm7VNOe6atR9AF4=
+github.com/pingcap/tidb/pkg/parser v0.0.0-20260227100901-bf3590904f3f h1:nKSf2kWgK3rtYV7sWuBe3s0A3YkzlWX+zz1MO8TycR4=
+github.com/pingcap/tidb/pkg/parser v0.0.0-20260227100901-bf3590904f3f/go.mod h1:oHE+ub2QaDERd+UNHe4z2BhFV2jZrm7VNOe6atR9AF4=
 github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c h1:+mdjkGKdHQG3305AYmdv1U2eRNDiU2ErMBj1gwrq8eQ=
 github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c/go.mod h1:7rwL4CYBLnjLxUqIJNnCWiEdr3bn6IUYi15bNlnbCCU=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
@@ -656,10 +656,10 @@ google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8/go.mod h1:JiN7NxoA
 google.golang.org/genproto v0.0.0-20190819201941-24fa4b261c55/go.mod h1:DMBHOl98Agz4BDEuKkezgsaosCRResVns1a3J2ZsMNc=
 google.golang.org/genproto v0.0.0-20200513103714-09dca8ec2884/go.mod h1:55QSHmfGQM9UVYDPBsyGGes0y52j32PQ3BqQfXhyH3c=
 google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013/go.mod h1:NbSheEEYHJ7i3ixzK3sjbqSGDJWnxyFXZblF3eUsNvo=
-google.golang.org/genproto/googleapis/api v0.0.0-20260223185530-2f722ef697dc h1:ULD+ToGXUIU6Pkzr1ARxdyvwfHbelw+agoFDRbLg4TU=
-google.golang.org/genproto/googleapis/api v0.0.0-20260223185530-2f722ef697dc/go.mod h1:M5krXqk4GhBKvB596udGL3UyjL4I1+cTbK0orROM9ng=
-google.golang.org/genproto/googleapis/rpc v0.0.0-20260223185530-2f722ef697dc h1:51Wupg8spF+5FC6D+iMKbOddFjMckETnNnEiZ+HX37s=
-google.golang.org/genproto/googleapis/rpc v0.0.0-20260223185530-2f722ef697dc/go.mod h1:4Hqkh8ycfw05ld/3BWL7rJOSfebL2Q+DVDeRgYgxUU8=
+google.golang.org/genproto/googleapis/api v0.0.0-20260226221140-a57be14db171 h1:tu/dtnW1o3wfaxCOjSLn5IRX4YDcJrtlpzYkhHhGaC4=
+google.golang.org/genproto/googleapis/api v0.0.0-20260226221140-a57be14db171/go.mod h1:M5krXqk4GhBKvB596udGL3UyjL4I1+cTbK0orROM9ng=
+google.golang.org/genproto/googleapis/rpc v0.0.0-20260226221140-a57be14db171 h1:ggcbiqK8WWh6l1dnltU4BgWGIGo+EVYxCaAPih/zQXQ=
+google.golang.org/genproto/googleapis/rpc v0.0.0-20260226221140-a57be14db171/go.mod h1:4Hqkh8ycfw05ld/3BWL7rJOSfebL2Q+DVDeRgYgxUU8=
 google.golang.org/grpc v1.19.0/go.mod h1:mqu4LbDTu4XGKhr4mRzUsmM4RtVoemTSY81AxZiDr8c=
 google.golang.org/grpc v1.23.0/go.mod h1:Y5yQAOtifL1yxbo5wqy6BxZv8vAUGQwXBOALyacEbxg=
 google.golang.org/grpc v1.25.1/go.mod h1:c3i+UQWmh7LiEpx4sFZnkU36qjEYZ0imhYfXVyQciAY=
