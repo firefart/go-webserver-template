@@ -15,6 +15,12 @@ func getCertificateChain(certPath string) (*x509.CertPool, error) {
 		rootCAs = x509.NewCertPool()
 	}
 
+	root, err := os.OpenRoot(certPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open root at cert path %s: %w", certPath, err)
+	}
+	defer root.Close()
+
 	if err := filepath.WalkDir(certPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return fmt.Errorf("error accessing path %s: %w", path, err)
@@ -24,10 +30,16 @@ func getCertificateChain(certPath string) (*x509.CertPool, error) {
 			return nil
 		}
 
+		// os.Root can only handle relative paths
+		path, err = filepath.Rel(certPath, path)
+		if err != nil {
+			return fmt.Errorf("failed to get relative path for %s: %w", path, err)
+		}
+
 		ext := filepath.Ext(d.Name())
 		switch ext {
 		case ".crt":
-			content, err := os.ReadFile(path)
+			content, err := root.ReadFile(path)
 			if err != nil {
 				return fmt.Errorf("failed to read cert file %s: %w", d.Name(), err)
 			}
@@ -45,7 +57,7 @@ func getCertificateChain(certPath string) (*x509.CertPool, error) {
 				return fmt.Errorf("failed to append crt from %s", d.Name())
 			}
 		case ".pem":
-			content, err := os.ReadFile(path)
+			content, err := root.ReadFile(path)
 			if err != nil {
 				return fmt.Errorf("failed to read cert file %s: %w", d.Name(), err)
 			}

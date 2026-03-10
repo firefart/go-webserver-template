@@ -130,6 +130,7 @@ type NotificationMSTeams struct {
 	Webhooks []string `koanf:"webhooks" validate:"required_if=Enabled true,dive,http_url"`
 }
 
+// nolint: gosec
 var defaultConfig = Configuration{
 	Server: Server{
 		Listen:              "127.0.0.1:8000",
