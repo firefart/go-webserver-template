@@ -1,6 +1,7 @@
 package http
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -18,11 +19,12 @@ type Client struct {
 }
 
 func NewHTTPClient(config config.Configuration, logger *slog.Logger, debugMode bool) (*Client, error) {
-	// use default transport so proxy is respected
-	tr, ok := http.DefaultTransport.(*http.Transport)
+	// clone default transport to avoid mutating global state
+	defaultTransport, ok := http.DefaultTransport.(*http.Transport)
 	if !ok {
 		return nil, errors.New("failed to cast default transport to http.Transport")
 	}
+	tr := defaultTransport.Clone()
 	if config.Proxy != nil && config.Proxy.URL != "" {
 		proxy, err := newProxy(*config.Proxy)
 		if err != nil {
@@ -36,6 +38,9 @@ func NewHTTPClient(config config.Configuration, logger *slog.Logger, debugMode b
 		rootCAs, err := getCertificateChain(config.CertDir)
 		if err != nil {
 			return nil, fmt.Errorf("could not get root cas: %w", err)
+		}
+		if tr.TLSClientConfig == nil {
+			tr.TLSClientConfig = &tls.Config{} //nolint:gosec
 		}
 		tr.TLSClientConfig.RootCAs = rootCAs
 	}
