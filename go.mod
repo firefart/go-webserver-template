@@ -1,6 +1,6 @@
 module github.com/firefart/go-webserver-template
 
-go 1.26
+go 1.26.0
 
 require (
 	github.com/a-h/templ v0.3.1001
@@ -108,7 +108,10 @@ require (
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/natefinch/atomic v1.0.1 // indirect
+	github.com/ncruces/go-sqlite3 v0.33.3 // indirect
+	github.com/ncruces/go-sqlite3-wasm v1.6.35300 // indirect
 	github.com/ncruces/go-strftime v1.0.0 // indirect
+	github.com/ncruces/julianday v1.0.0 // indirect
 	github.com/oapi-codegen/runtime v1.4.0 // indirect
 	github.com/paulmach/orb v0.13.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
@@ -118,7 +121,7 @@ require (
 	github.com/pingcap/errors v0.11.5-0.20250523034308-74f78ae071ee // indirect
 	github.com/pingcap/failpoint v0.0.0-20260406204437-bbc9d102c19e // indirect
 	github.com/pingcap/log v1.1.0 // indirect
-	github.com/pingcap/tidb/pkg/parser v0.0.0-20260419050009-a10a43ada5ab // indirect
+	github.com/pingcap/tidb/pkg/parser v0.0.0-20260420113937-9c56ea641cfe // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.67.5 // indirect
@@ -133,9 +136,10 @@ require (
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/cobra v1.10.2 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
-	github.com/sqlc-dev/sqlc v1.30.0 // indirect
+	github.com/sqlc-dev/doubleclick v1.0.0 // indirect
+	github.com/sqlc-dev/sqlc v1.31.0 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
-	github.com/tdewolff/parse/v2 v2.8.11 // indirect
+	github.com/tdewolff/parse/v2 v2.8.12 // indirect
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/tetratelabs/wazero v1.11.0 // indirect
 	github.com/tursodatabase/libsql-client-go v0.0.0-20251219100830-236aa1ff8acc // indirect
