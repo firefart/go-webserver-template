@@ -9,7 +9,7 @@
   "features": {
     "ghcr.io/guiyomh/features/golangci-lint:0": {},
     "ghcr.io/devcontainers-extra/features/go-task:1": {},
-    "ghcr.io/devcontainers/features/node:1": {}
+    "ghcr.io/devcontainers/features/node:2": {}
   },
   "postCreateCommand": {
     "install dependencies": "task setup",
