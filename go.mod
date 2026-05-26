@@ -120,7 +120,7 @@ require (
 	github.com/pingcap/errors v0.11.5-0.20250523034308-74f78ae071ee // indirect
 	github.com/pingcap/failpoint v0.0.0-20260521055755-e7642935314f // indirect
 	github.com/pingcap/log v1.1.0 // indirect
-	github.com/pingcap/tidb/pkg/parser v0.0.0-20260525123733-8b80ab7e7ec4 // indirect
+	github.com/pingcap/tidb/pkg/parser v0.0.0-20260526115406-a09db00c63f7 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.67.5 // indirect
@@ -143,7 +143,7 @@ require (
 	github.com/tetratelabs/wazero v1.11.0 // indirect
 	github.com/tursodatabase/libsql-client-go v0.0.0-20260514053736-a9a8fadfe885 // indirect
 	github.com/vertica/vertica-sql-go v1.3.6 // indirect
-	github.com/wasilibs/go-pgquery v0.0.0-20260519030130-725a785941e3 // indirect
+	github.com/wasilibs/go-pgquery v0.0.0-20260526011917-40df1ddb6e56 // indirect
 	github.com/wasilibs/wazero-helpers v0.0.0-20250123031827-cd30c44769bb // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/ydb-platform/ydb-go-genproto v0.0.0-20260428144813-1c07baab7f7b // indirect
@@ -169,7 +169,7 @@ require (
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	howett.net/plist v1.0.1 // indirect
-	modernc.org/libc v1.72.4 // indirect
+	modernc.org/libc v1.72.5 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 	mvdan.cc/gofumpt v0.10.0 // indirect
