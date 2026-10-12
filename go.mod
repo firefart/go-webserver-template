@@ -18,7 +18,7 @@ require (
 	github.com/prometheus/client_golang v1.25.0
 	github.com/stretchr/testify v1.12.1
 	github.com/wneessen/go-mail v0.8.1
-	golang.org/x/net v0.59.0
+	golang.org/x/net v0.60.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	modernc.org/sqlite v1.60.1
 )
