@@ -15,7 +15,7 @@ require (
 	github.com/mattn/go-isatty v0.0.24
 	github.com/nikoksr/notify v1.6.0
 	github.com/pressly/goose/v3 v3.28.0
-	github.com/prometheus/client_golang v1.24.1
+	github.com/prometheus/client_golang v1.25.0
 	github.com/stretchr/testify v1.12.1
 	github.com/wneessen/go-mail v0.8.1
 	golang.org/x/net v0.59.0
