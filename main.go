@@ -62,8 +62,7 @@ func main() {
 	configuration, err := config.GetConfig(configFilename)
 	if err != nil {
 		// check if we have a multierror from multiple validation errors
-		var merr *multierror.Error
-		if errors.As(err, &merr) {
+		if merr, ok := errors.AsType[*multierror.Error](err); ok {
 			for _, e := range merr.Errors {
 				log.Println("Error in config:", e.Error())
 			}

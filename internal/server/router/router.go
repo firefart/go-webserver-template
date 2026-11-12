@@ -26,8 +26,7 @@ func New() *Router {
 }
 
 func defaultErrorHandler(w http.ResponseWriter, _ *http.Request, err error) {
-	var httpErr *httperror.HTTPError
-	if errors.As(err, &httpErr) {
+	if httpErr, ok := errors.AsType[*httperror.HTTPError](err); ok {
 		http.Error(w, err.Error(), httpErr.StatusCode)
 	} else {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
